@@ -1,0 +1,808 @@
+
+{
+  "project": {
+    "name": "VOWORA",
+    "tagline": "Your Wedding. Your Story. Your Invitation.",
+    "product_type": "Premium digital wedding invitation maker and wedding website builder",
+    "platform": "Responsive full-stack web application",
+    "working_brand_name": true,
+    "primary_goal": "Build a genuinely functional, beautiful, premium wedding invitation platform that allows anyone to create, customize, publish and share a personalized digital wedding experience.",
+    "target_audience": [
+      "Indian couples",
+      "USA and European couples",
+      "Modern families planning weddings",
+      "Wedding planners",
+      "Destination wedding organizers",
+      "Invitation designers"
+    ],
+    "primary_languages": [
+      "English",
+      "Hindi",
+      "Gujarati"
+    ],
+    "secondary_language_architecture": "Make translations extensible for additional languages."
+  },
+  "core_product_vision": {
+    "instruction": "Do not build a simple static landing page or a basic wedding invitation generator. Build a complete wedding invitation product with a polished user experience and genuinely working interactions.",
+    "experience": [
+      "Discover professionally art-directed wedding invitation templates.",
+      "Start a wedding project in a guided creation flow.",
+      "Personalize names, dates, events, photographs, wording, colors and typography.",
+      "Preview the invitation in real time on mobile and desktop.",
+      "Publish a personalized wedding website with a unique shareable URL.",
+      "Generate an invitation QR code.",
+      "Collect and manage guest RSVPs.",
+      "Manage multiple wedding functions and event schedules.",
+      "See invitation engagement and RSVP statistics."
+    ],
+    "design_philosophy": "Luxury editorial design, personal storytelling, cultural identity, craftsmanship and simplicity. The result should feel like a premium design studio made the product, not an AI-generated website."
+  },
+  "brand_identity": {
+    "brand_name": "VOWORA",
+    "logo_direction": "Create an elegant custom wordmark with refined serif lettering. Create a small, minimal monogram using the letter V. Avoid generic wedding rings and obvious AI-style logos.",
+    "personality": [
+      "Elegant",
+      "Warm",
+      "Romantic",
+      "Modern",
+      "Trustworthy",
+      "Premium",
+      "Personal"
+    ],
+    "color_system": {
+      "page_background": "#FAF8F4",
+      "surface": "#FFFFFF",
+      "primary_text": "#292720",
+      "secondary_text": "#77746B",
+      "muted": "#ECE8DF",
+      "champagne": "#B99A6A",
+      "sage": "#87917A",
+      "blush": "#E8C7C4",
+      "terracotta": "#B9765E",
+      "deep_green": "#34453A",
+      "dark_editor": "#242720",
+      "border": "#EAE5DC"
+    },
+    "typography": {
+      "display": "Cormorant Garamond",
+      "headings": "Playfair Display",
+      "body": "DM Sans",
+      "interface": "Inter",
+      "rules": [
+        "Use elegant serif typography for couple names and wedding headlines.",
+        "Use clean sans-serif typography for buttons, forms and dashboard information.",
+        "Use script typography only as an optional decorative accent.",
+        "Never use excessive font combinations.",
+        "Maintain excellent readability on mobile."
+      ]
+    },
+    "visual_language": [
+      "Ivory paper textures used selectively",
+      "Fine editorial borders",
+      "Subtle botanical illustrations",
+      "Elegant whitespace",
+      "Fine champagne accents",
+      "Beautiful real wedding photography",
+      "Custom cultural illustrations",
+      "High-quality image composition",
+      "Natural shadows",
+      "Premium visual hierarchy"
+    ],
+    "avoid": [
+      "Generic purple AI gradients",
+      "Excessive glassmorphism",
+      "Random floating elements",
+      "Too many rounded cards",
+      "Excessive gold effects",
+      "Overloaded dashboards",
+      "Cheap wedding clipart",
+      "Emoji-based design",
+      "Unnecessary animations",
+      "Generic AI-generated stock illustrations"
+    ]
+  },
+  "technical_architecture": {
+    "frontend": "React with TypeScript",
+    "styling": "Tailwind CSS with reusable design tokens and custom CSS",
+    "icons": "Lucide icons",
+    "routing": "React Router",
+    "backend": "Node.js server runtime",
+    "database": "Firebase Cloud Firestore",
+    "authentication": "Firebase Authentication",
+    "file_storage": "Firebase Storage when configured",
+    "animation": "Framer Motion or an equivalent lightweight animation solution",
+    "forms": "React Hook Form with schema validation",
+    "date_handling": "Use a reliable date utility library and timezone-aware event data.",
+    "qr_code": "Use a maintained QR code library.",
+    "image_export": "Use a reliable browser image export library for invitation artwork.",
+    "requirements": [
+      "Use reusable React components.",
+      "Maintain a clean and scalable file structure.",
+      "Keep business logic separate from UI components.",
+      "Use secure server-side operations for protected functionality.",
+      "Never expose API keys or secrets in frontend code.",
+      "Create environment variable documentation.",
+      "Add loading, empty, success and error states.",
+      "Implement responsive layouts properly.",
+      "Do not leave core buttons as decorative placeholders."
+    ],
+    "firebase_behavior": "Set up Firebase Authentication and Firestore when the user enables Firebase integration. If Firebase credentials or project setup are unavailable, provide a clearly identified local development mode so the interface can still be tested without pretending that cloud saving or publishing has succeeded."
+  },
+  "app_structure": {
+    "public_routes": [
+      "/",
+      "/templates",
+      "/pricing",
+      "/about",
+      "/i/:slug"
+    ],
+    "authenticated_routes": [
+      "/dashboard",
+      "/create",
+      "/editor/:projectId",
+      "/my-invitations",
+      "/guests/:projectId",
+      "/settings",
+      "/account"
+    ],
+    "navigation": {
+      "desktop": "Minimal premium top navigation with logo, Templates, How It Works, Pricing, Sign In and a clear Create Invitation CTA.",
+      "mobile": "Compact responsive header with menu and prominent create action.",
+      "dashboard": "Use a clean sidebar on desktop and an adaptive navigation system on mobile."
+    }
+  },
+  "landing_page": {
+    "visual_direction": "Luxury editorial wedding magazine meets a premium modern SaaS platform.",
+    "hero": {
+      "headline": "Every Love Story Deserves a Beautiful Beginning.",
+      "subheadline": "Create a wedding invitation that feels like you. Design your card, tell your story and bring every guest closer with one beautiful link.",
+      "primary_cta": "Create Your Invitation",
+      "secondary_cta": "Explore Designs",
+      "visual": "A large editorial mockup showing an elegant ivory digital wedding invitation on a smartphone alongside a refined printed-card composition.",
+      "animation": "Soft staggered content reveal, subtle image movement and elegant entrance transitions.",
+      "important": "Make the hero visually impressive without overcrowding it."
+    },
+    "sections": [
+      {
+        "name": "Featured Invitations",
+        "purpose": "Show beautiful professionally designed invitation templates."
+      },
+      {
+        "name": "One Invitation. Every Detail.",
+        "purpose": "Explain the combination of digital card, wedding website, event schedule and RSVP."
+      },
+      {
+        "name": "Designed Around Your Story",
+        "purpose": "Show different visual styles and cultural personalization."
+      },
+      {
+        "name": "How It Works",
+        "purpose": "Choose a design, personalize it, publish it and invite your guests."
+      },
+      {
+        "name": "Beautiful on Every Screen",
+        "purpose": "Demonstrate realistic desktop and mobile invitation previews."
+      },
+      {
+        "name": "Guest Management",
+        "purpose": "Show RSVP tracking, guest lists and QR-based check-in."
+      },
+      {
+        "name": "Pricing",
+        "purpose": "Show transparent free and premium plan comparisons."
+      },
+      {
+        "name": "Final CTA",
+        "purpose": "Encourage users to begin creating their wedding invitation."
+      }
+    ]
+  },
+  "template_library": {
+    "instruction": "Create a visually rich template gallery with at least eight distinctly art-directed original templates. They must not look like recolored copies of one layout.",
+    "templates": [
+      {
+        "id": "modern-ivory",
+        "name": "Modern Ivory",
+        "style": "Minimal luxury editorial",
+        "palette": "Ivory, black and champagne"
+      },
+      {
+        "id": "royal-indian",
+        "name": "Royal Heritage",
+        "style": "Indian palace-inspired invitation",
+        "palette": "Deep maroon, ivory and antique gold"
+      },
+      {
+        "id": "botanical-love",
+        "name": "Botanical Romance",
+        "style": "Hand-painted botanical composition",
+        "palette": "Sage, cream and soft green"
+      },
+      {
+        "id": "floral-blush",
+        "name": "Blush Garden",
+        "style": "Elegant floral wedding stationery",
+        "palette": "Blush, warm white and muted rose"
+      },
+      {
+        "id": "editorial-black",
+        "name": "Black Tie",
+        "style": "Modern monochrome editorial",
+        "palette": "Black, ivory and subtle silver"
+      },
+      {
+        "id": "destination",
+        "name": "Destination Wedding",
+        "style": "Mediterranean-inspired elegant wedding",
+        "palette": "Sand, blue and warm white"
+      },
+      {
+        "id": "mehndi-festive",
+        "name": "Mehndi Celebration",
+        "style": "Contemporary Indian festive artwork",
+        "palette": "Terracotta, saffron and green"
+      },
+      {
+        "id": "pastel-romance",
+        "name": "Pastel Romance",
+        "style": "Contemporary romantic illustration",
+        "palette": "Lavender, pale pink and cream"
+      }
+    ],
+    "gallery_features": [
+      "Large visual template previews",
+      "Category filters",
+      "Search by style and color",
+      "Indian and international styles",
+      "Desktop and mobile preview",
+      "Favorite templates",
+      "Preview before editing",
+      "Start with this design action"
+    ],
+    "asset_rule": "Use carefully selected image assets with consistent artistic direction. Never use unrelated placeholder images as final invitation artwork."
+  },
+  "invitation_creation_flow": {
+    "experience": "A guided multi-step flow that feels simple and reassuring.",
+    "steps": [
+      {
+        "step": 1,
+        "name": "Choose Your Style",
+        "fields": [
+          "Template",
+          "Wedding aesthetic",
+          "Preferred palette"
+        ]
+      },
+      {
+        "step": 2,
+        "name": "The Couple",
+        "fields": [
+          "Partner one name",
+          "Partner two name",
+          "Couple photograph",
+          "Short love story",
+          "Optional family names"
+        ]
+      },
+      {
+        "step": 3,
+        "name": "Wedding Events",
+        "fields": [
+          "Event name",
+          "Date",
+          "Start time",
+          "End time",
+          "Timezone",
+          "Venue name",
+          "Venue address",
+          "Dress code",
+          "Event description"
+        ],
+        "function_examples": [
+          "Engagement",
+          "Mehndi",
+          "Haldi",
+          "Sangeet",
+          "Wedding Ceremony",
+          "Reception",
+          "After Party"
+        ]
+      },
+      {
+        "step": 4,
+        "name": "Make It Personal",
+        "fields": [
+          "Invitation wording",
+          "Font selection",
+          "Color selection",
+          "Cover photograph",
+          "Background artwork",
+          "Music preference",
+          "Language"
+        ]
+      },
+      {
+        "step": 5,
+        "name": "Guest Experience",
+        "fields": [
+          "Enable RSVP",
+          "RSVP deadline",
+          "Allow plus ones",
+          "Meal preference",
+          "Guest access settings",
+          "Show wedding story",
+          "Show photo gallery"
+        ]
+      },
+      {
+        "step": 6,
+        "name": "Preview and Publish",
+        "fields": [
+          "Full invitation preview",
+          "Mobile preview",
+          "Desktop preview",
+          "Publish settings",
+          "Custom invitation URL"
+        ]
+      }
+    ],
+    "functional_rules": [
+      "Save progress automatically when authenticated.",
+      "Allow users to move backward and forward.",
+      "Preserve every field when changing steps.",
+      "Validate required fields before continuing.",
+      "Display a clear creation progress indicator.",
+      "Allow users to save an unfinished draft.",
+      "Never publish automatically without an explicit action."
+    ]
+  },
+  "invitation_editor": {
+    "design": "Create a professional browser-based invitation editor with a clean workspace.",
+    "desktop_layout": {
+      "left_panel": "Section navigation and editable content controls.",
+      "center_panel": "Large live invitation canvas.",
+      "right_panel": "Typography, colors, spacing, background, image and section settings.",
+      "top_toolbar": "Project name, undo, redo, autosave status, preview and publish."
+    },
+    "editor_controls": [
+      "Edit text",
+      "Change font",
+      "Adjust font size",
+      "Change text color",
+      "Adjust alignment",
+      "Adjust section spacing",
+      "Change background",
+      "Upload photographs",
+      "Replace template",
+      "Reorder event sections",
+      "Toggle sections",
+      "Edit RSVP settings",
+      "Preview desktop",
+      "Preview mobile",
+      "Undo and redo"
+    ],
+    "editing_behavior": [
+      "All changes must update the preview immediately.",
+      "Keep text editing intuitive and reliable.",
+      "Provide sensible limits for typography and image sizes.",
+      "Prevent accidental loss of edits.",
+      "Keep templates visually consistent after customization.",
+      "Make the mobile editor usable, not just a compressed desktop layout."
+    ],
+    "export_options": [
+      "Export invitation as PNG",
+      "Copy published URL",
+      "Generate QR code",
+      "Print-friendly invitation view"
+    ]
+  },
+  "public_wedding_website": {
+    "route": "/i/:slug",
+    "purpose": "Each published wedding project gets a beautiful, public-facing, shareable mini wedding website.",
+    "sections": [
+      "Animated invitation cover",
+      "Couple names and wedding date",
+      "Personalized invitation message",
+      "Couple story",
+      "Wedding countdown",
+      "Event timeline",
+      "Venue information",
+      "Map and directions link",
+      "Dress code",
+      "Photo gallery",
+      "RSVP form",
+      "Guest information",
+      "Optional gift or registry information",
+      "Contact information",
+      "Elegant footer"
+    ],
+    "personalization": [
+      "Use the selected template's design system.",
+      "Show only sections enabled by the couple.",
+      "Display localized dates and times.",
+      "Keep venue directions accessible.",
+      "Support multiple wedding events.",
+      "Support a private invitation mode."
+    ],
+    "mobile_priority": "The published invitation should feel like a beautiful mobile-first experience, especially when opened from WhatsApp or a social messaging app."
+  },
+  "animation_system": {
+    "philosophy": "Use motion to create emotion and reveal information. Never animate everything at once.",
+    "cover_reveal": {
+      "behavior": "An elegant digital invitation envelope or folded paper cover opens when the guest taps Open Invitation.",
+      "details": [
+        "Natural paper-like movement",
+        "Smooth perspective transition",
+        "Subtle background depth",
+        "Soft fade into invitation",
+        "Optional restrained petal reveal"
+      ]
+    },
+    "scroll_experience": [
+      "Soft fade and rise on section entry",
+      "Gentle parallax on selected photographs",
+      "Elegant timeline reveal",
+      "Staggered event content",
+      "Subtle image transitions"
+    ],
+    "micro_interactions": [
+      "Smooth button hover",
+      "Refined focus states",
+      "Elegant modal transitions",
+      "Soft success animation after RSVP",
+      "Subtle loading indicators",
+      "Polished editor interactions"
+    ],
+    "technical_rules": [
+      "Prefer transform and opacity animations.",
+      "Keep motion smooth and performance-conscious.",
+      "Avoid layout-shifting animation.",
+      "Respect prefers-reduced-motion.",
+      "Ensure animations work on mid-range mobile devices.",
+      "Use sound or music only after an explicit user interaction and with an accessible mute control."
+    ]
+  },
+  "rsvp_and_guest_management": {
+    "guest_features": [
+      "Guest name",
+      "Email or phone",
+      "Number of attending guests",
+      "Attendance confirmation",
+      "Selected wedding events",
+      "Meal preference",
+      "Dietary notes",
+      "Special message"
+    ],
+    "rsvp_actions": [
+      "Accept Invitation",
+      "Decline Invitation",
+      "Maybe"
+    ],
+    "dashboard_features": [
+      "Total invited",
+      "Confirmed guests",
+      "Declined guests",
+      "Pending responses",
+      "Event-wise attendance",
+      "Dietary preference overview",
+      "Guest search and filters",
+      "Export guest list to CSV"
+    ],
+    "qr_check_in": {
+      "enabled": true,
+      "behavior": "Generate a unique guest entry code or QR pass for eligible confirmed guests. Build a basic authenticated check-in interface for wedding organizers.",
+      "security": "Validate each QR code against the corresponding wedding project and guest record on the server. Do not expose private guest information in the QR payload."
+    }
+  },
+  "ai_assistant": {
+    "name": "Vowora Studio",
+    "purpose": "Help couples write and personalize invitation content without taking control away from the user.",
+    "features": [
+      "Generate invitation wording",
+      "Suggest romantic headlines",
+      "Rewrite formal family invitation wording",
+      "Translate invitation content",
+      "Suggest event descriptions",
+      "Create short couple stories",
+      "Suggest dress code wording",
+      "Suggest RSVP reminder messages"
+    ],
+    "tone_options": [
+      "Elegant",
+      "Traditional",
+      "Romantic",
+      "Modern",
+      "Minimal",
+      "Playful"
+    ],
+    "rules": [
+      "Never invent names, dates, venues or family details.",
+      "Use information supplied by the user.",
+      "Always let the user edit generated content.",
+      "Do not automatically replace existing content.",
+      "Call Gemini through a secure server-side integration when configured.",
+      "Provide useful manual fallback options when AI services are unavailable."
+    ]
+  },
+  "user_dashboard": {
+    "greeting": "Your wedding story starts here.",
+    "main_sections": [
+      "Create New Invitation",
+      "My Invitations",
+      "Recent Projects",
+      "Template Favorites",
+      "Guest Management",
+      "RSVP Overview",
+      "Account Settings"
+    ],
+    "project_card": [
+      "Invitation thumbnail",
+      "Couple names",
+      "Wedding date",
+      "Draft or Published status",
+      "Last edited",
+      "Edit action",
+      "Preview action",
+      "Duplicate action",
+      "Delete action"
+    ],
+    "dashboard_statistics": [
+      "Invitation views",
+      "Total RSVP responses",
+      "Confirmed guests",
+      "Pending guests"
+    ]
+  },
+  "pricing_and_access": {
+    "plans": [
+      {
+        "name": "Free",
+        "features": [
+          "Create an invitation",
+          "Access selected free templates",
+          "Customize couple names and dates",
+          "Mobile invitation preview",
+          "Basic RSVP collection",
+          "Standard shareable link"
+        ]
+      },
+      {
+        "name": "Premium",
+        "features": [
+          "Premium template collection",
+          "More customization options",
+          "Advanced invitation animations",
+          "Custom wedding URL",
+          "Unlimited event sections",
+          "Guest analytics",
+          "Advanced RSVP settings",
+          "High-resolution downloads",
+          "Custom branding options"
+        ]
+      }
+    ],
+    "implementation": "Build a functional plan comparison and entitlement system. Do not integrate a live payment gateway until credentials and merchant configuration are provided. Do not simulate successful payments."
+  },
+  "database_design": {
+    "collections": {
+      "users": [
+        "uid",
+        "displayName",
+        "email",
+        "createdAt",
+        "subscriptionPlan"
+      ],
+      "weddings": [
+        "weddingId",
+        "ownerId",
+        "partnerOne",
+        "partnerTwo",
+        "weddingDate",
+        "timezone",
+        "templateId",
+        "slug",
+        "status",
+        "theme",
+        "settings",
+        "createdAt",
+        "updatedAt"
+      ],
+      "events": [
+        "eventId",
+        "weddingId",
+        "name",
+        "description",
+        "date",
+        "startTime",
+        "endTime",
+        "venue",
+        "dressCode",
+        "sortOrder"
+      ],
+      "guests": [
+        "guestId",
+        "weddingId",
+        "name",
+        "contact",
+        "inviteCode",
+        "rsvpStatus",
+        "attendingCount",
+        "mealPreference",
+        "dietaryNotes",
+        "selectedEvents",
+        "checkedIn"
+      ],
+      "rsvps": [
+        "rsvpId",
+        "weddingId",
+        "guestId",
+        "response",
+        "attendingCount",
+        "selectedEvents",
+        "message",
+        "submittedAt"
+      ],
+      "media": [
+        "mediaId",
+        "weddingId",
+        "storagePath",
+        "mediaType",
+        "createdAt"
+      ]
+    },
+    "security": [
+      "Users may edit only their own wedding projects.",
+      "Public invitation routes expose only intended public fields.",
+      "Private wedding pages require authorized access.",
+      "RSVP submissions must be validated server-side.",
+      "Guest management must require authenticated ownership.",
+      "QR check-in must verify the event and guest.",
+      "Add suitable Firestore security rules.",
+      "Never rely on frontend-only permission checks."
+    ]
+  },
+  "responsive_design": {
+    "breakpoints": [
+      "Mobile: 360px to 767px",
+      "Tablet: 768px to 1023px",
+      "Desktop: 1024px to 1439px",
+      "Large desktop: 1440px and above"
+    ],
+    "requirements": [
+      "Mobile-first invitation experience.",
+      "No horizontal overflow.",
+      "Responsive navigation.",
+      "Touch-friendly controls.",
+      "Responsive template grids.",
+      "Adaptive editor panels.",
+      "Readable typography on every screen.",
+      "Responsive images with appropriate cropping.",
+      "Test portrait and landscape layouts."
+    ]
+  },
+  "quality_and_performance": {
+    "requirements": [
+      "Use optimized image sizes and lazy loading.",
+      "Avoid unnecessary large dependencies.",
+      "Prevent unnecessary React rerenders.",
+      "Provide accessible labels for all inputs.",
+      "Use semantic HTML.",
+      "Provide keyboard-accessible interactions.",
+      "Maintain strong text contrast.",
+      "Show meaningful errors instead of blank screens.",
+      "Validate uploaded files and file sizes.",
+      "Handle missing images gracefully.",
+      "Use safe public URL slug validation.",
+      "Handle invalid and expired invitation links.",
+      "Use a sensible loading experience.",
+      "Prevent duplicate RSVP submissions."
+    ],
+    "seo": [
+      "Page titles and descriptions",
+      "Social sharing metadata",
+      "Open Graph wedding preview image",
+      "Readable public invitation URLs",
+      "No indexing of private invitations"
+    ]
+  },
+  "demo_data": {
+    "instruction": "Create one polished demo wedding project so the application looks complete immediately after launch.",
+    "couple": [
+      "Aarav",
+      "Meera"
+    ],
+    "demo_events": [
+      {
+        "name": "Mehndi Celebration",
+        "date": "Use an illustrative future date",
+        "venue": "The Garden Courtyard"
+      },
+      {
+        "name": "Wedding Ceremony",
+        "date": "Use the same illustrative wedding date",
+        "venue": "The Grand Palace"
+      },
+      {
+        "name": "Reception",
+        "date": "Use an illustrative future date",
+        "venue": "The Grand Ballroom"
+      }
+    ],
+    "instruction_2": "Clearly label demo content. Never confuse sample project information with the current authenticated user's data."
+  },
+  "development_execution": {
+    "priority": "Build a working product rather than a visual concept.",
+    "phases": [
+      {
+        "phase": 1,
+        "name": "Visual Foundation",
+        "deliverables": [
+          "Brand system",
+          "Landing page",
+          "Responsive navigation",
+          "Template gallery"
+        ]
+      },
+      {
+        "phase": 2,
+        "name": "Creation Experience",
+        "deliverables": [
+          "Authentication",
+          "Creation wizard",
+          "Invitation editor",
+          "Live preview",
+          "Draft saving"
+        ]
+      },
+      {
+        "phase": 3,
+        "name": "Published Invitations",
+        "deliverables": [
+          "Public wedding page",
+          "Unique invitation URL",
+          "QR code",
+          "Invitation export"
+        ]
+      },
+      {
+        "phase": 4,
+        "name": "Guest Experience",
+        "deliverables": [
+          "RSVP form",
+          "Guest dashboard",
+          "RSVP analytics",
+          "Basic QR check-in"
+        ]
+      },
+      {
+        "phase": 5,
+        "name": "Final Polish",
+        "deliverables": [
+          "Responsive testing",
+          "Animation refinement",
+          "Accessibility",
+          "Error handling",
+          "Performance improvements"
+        ]
+      }
+    ],
+    "important": "Implement the complete application in the project files. Do not stop after creating the landing page. Make the major end-to-end user journeys functional."
+  },
+  "acceptance_criteria": [
+    "A visitor can browse wedding templates.",
+    "A visitor can start creating an invitation.",
+    "The creation wizard preserves user input.",
+    "A user can customize an invitation and preview changes.",
+    "An authenticated user can save a wedding project.",
+    "A published invitation receives a unique URL.",
+    "The public invitation looks excellent on mobile.",
+    "A guest can submit an RSVP.",
+    "The owner can view the RSVP in guest management.",
+    "The owner can generate and download a QR code.",
+    "The invitation can be exported as a PNG.",
+    "All primary buttons perform their intended actions.",
+    "Private information is not exposed publicly.",
+    "The application has no major runtime errors."
+  ],
+  "final_instruction": "Start building VOWORA now. First establish the complete design system and responsive application architecture, then implement the working user journeys. Do not return only a plan, explanation, wireframe or static mockup. Create the actual runnable React application, populate it with refined sample content, verify the important interactions and fix obvious runtime errors. Favor craftsmanship, originality, clarity, premium visual quality and functional completeness over unnecessary decoration."
+}

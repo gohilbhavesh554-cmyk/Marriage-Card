@@ -1,0 +1,6 @@
+{
+  "name": "VOWORA — Digital Wedding Invitations & Websites",
+  "description": "Luxury editorial digital wedding invitation maker and wedding website builder with real-time customization, RSVP management, and QR guest check-in.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

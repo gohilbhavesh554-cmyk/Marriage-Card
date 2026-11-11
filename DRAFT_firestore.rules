@@ -1,0 +1,462 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net: Default-deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // =========================================================================
+    // Global Hardened Primitives
+    // =========================================================================
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    // =========================================================================
+    // Entity Validation Blueprints (Anti-Update-Gap)
+    // =========================================================================
+
+    function isValidUser(data, userId) {
+      return data.keys().hasAll([
+        'uid', 'displayName', 'email', 'subscriptionPlan',
+        'favoriteTemplates', 'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'uid', 'displayName', 'email', 'subscriptionPlan',
+        'favoriteTemplates', 'createdAt', 'updatedAt'
+      ]) &&
+      data.uid is string && data.uid.size() >= 1 && data.uid.size() <= 128 &&
+      data.uid == userId && data.uid == request.auth.uid &&
+      data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 120 &&
+      data.email is string && data.email.size() >= 3 && data.email.size() <= 254 &&
+      data.email == request.auth.token.email &&
+      data.subscriptionPlan is string && data.subscriptionPlan.size() <= 20 &&
+      (data.subscriptionPlan == 'free' || data.subscriptionPlan == 'premium') &&
+      data.favoriteTemplates is list && data.favoriteTemplates.size() <= 20 &&
+      (data.favoriteTemplates.size() == 0 || (data.favoriteTemplates[0] is string && data.favoriteTemplates[0].size() <= 64)) &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    function isValidThemeConfig(theme) {
+      return theme is map &&
+        theme.keys().hasAll([
+          'fontHeading', 'fontBody', 'primaryColor', 'accentColor',
+          'bgColor', 'textColor', 'alignment', 'spacing', 'backgroundStyle', 'musicStyle'
+        ]) &&
+        theme.keys().hasOnly([
+          'fontHeading', 'fontBody', 'primaryColor', 'accentColor',
+          'bgColor', 'textColor', 'alignment', 'spacing', 'backgroundStyle', 'musicStyle'
+        ]) &&
+        theme.fontHeading is string && theme.fontHeading.size() <= 80 &&
+        theme.fontBody is string && theme.fontBody.size() <= 80 &&
+        theme.primaryColor is string && theme.primaryColor.size() <= 30 &&
+        theme.accentColor is string && theme.accentColor.size() <= 30 &&
+        theme.bgColor is string && theme.bgColor.size() <= 30 &&
+        theme.textColor is string && theme.textColor.size() <= 30 &&
+        theme.alignment is string && theme.alignment.size() <= 20 &&
+        theme.spacing is string && theme.spacing.size() <= 20 &&
+        theme.backgroundStyle is string && theme.backgroundStyle.size() <= 40 &&
+        theme.musicStyle is string && theme.musicStyle.size() <= 40;
+    }
+
+    function isValidSectionSettings(sec) {
+      return sec is map &&
+        sec.keys().hasAll([
+          'showStory', 'showCountdown', 'showEvents', 'showVenue',
+          'showGallery', 'showDressCode', 'showRsvp', 'showRegistry',
+          'enablePlusOnes', 'enableMealPreference'
+        ]) &&
+        sec.keys().hasOnly([
+          'showStory', 'showCountdown', 'showEvents', 'showVenue',
+          'showGallery', 'showDressCode', 'showRsvp', 'showRegistry',
+          'enablePlusOnes', 'enableMealPreference'
+        ]) &&
+        sec.showStory is bool &&
+        sec.showCountdown is bool &&
+        sec.showEvents is bool &&
+        sec.showVenue is bool &&
+        sec.showGallery is bool &&
+        sec.showDressCode is bool &&
+        sec.showRsvp is bool &&
+        sec.showRegistry is bool &&
+        sec.enablePlusOnes is bool &&
+        sec.enableMealPreference is bool;
+    }
+
+    function isValidWedding(data, weddingId) {
+      return data.keys().hasAll([
+        'weddingId', 'ownerId', 'partnerOne', 'partnerTwo',
+        'familyOne', 'familyTwo', 'weddingDate', 'timezone',
+        'templateId', 'slug', 'status', 'isPrivate', 'accessPasscode',
+        'language', 'headline', 'invitationWording', 'story',
+        'coverPhotoUrl', 'couplePhotoUrl', 'venueSummary', 'cityCountry',
+        'mapLink', 'dressCodeNote', 'rsvpDeadline', 'registryNote',
+        'registryUrl', 'contactInfo', 'themeConfig', 'sectionSettings',
+        'viewsCount', 'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'weddingId', 'ownerId', 'partnerOne', 'partnerTwo',
+        'familyOne', 'familyTwo', 'weddingDate', 'timezone',
+        'templateId', 'slug', 'status', 'isPrivate', 'accessPasscode',
+        'language', 'headline', 'invitationWording', 'story',
+        'coverPhotoUrl', 'couplePhotoUrl', 'venueSummary', 'cityCountry',
+        'mapLink', 'dressCodeNote', 'rsvpDeadline', 'registryNote',
+        'registryUrl', 'contactInfo', 'themeConfig', 'sectionSettings',
+        'viewsCount', 'createdAt', 'updatedAt'
+      ]) &&
+      data.weddingId is string && data.weddingId.size() >= 1 && data.weddingId.size() <= 128 &&
+      data.weddingId == weddingId &&
+      data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 &&
+      data.ownerId == request.auth.uid &&
+      data.partnerOne is string && data.partnerOne.size() >= 1 && data.partnerOne.size() <= 100 &&
+      data.partnerTwo is string && data.partnerTwo.size() >= 1 && data.partnerTwo.size() <= 100 &&
+      data.familyOne is string && data.familyOne.size() <= 250 &&
+      data.familyTwo is string && data.familyTwo.size() <= 250 &&
+      data.weddingDate is string && data.weddingDate.size() >= 4 && data.weddingDate.size() <= 40 &&
+      data.timezone is string && data.timezone.size() >= 2 && data.timezone.size() <= 80 &&
+      data.templateId is string && data.templateId.size() >= 2 && data.templateId.size() <= 64 &&
+      data.slug is string && data.slug.size() >= 2 && data.slug.size() <= 100 &&
+      data.slug.matches('^[a-z0-9\\-]+$') &&
+      data.status is string && data.status.size() <= 20 &&
+      (data.status == 'draft' || data.status == 'published') &&
+      data.isPrivate is bool &&
+      data.accessPasscode is string && data.accessPasscode.size() <= 64 &&
+      data.language is string && data.language.size() <= 10 &&
+      (data.language == 'en' || data.language == 'hi' || data.language == 'gu') &&
+      data.headline is string && data.headline.size() <= 300 &&
+      data.invitationWording is string && data.invitationWording.size() <= 1500 &&
+      data.story is string && data.story.size() <= 3000 &&
+      data.coverPhotoUrl is string && data.coverPhotoUrl.size() <= 2000 &&
+      data.couplePhotoUrl is string && data.couplePhotoUrl.size() <= 2000 &&
+      data.venueSummary is string && data.venueSummary.size() <= 300 &&
+      data.cityCountry is string && data.cityCountry.size() <= 160 &&
+      data.mapLink is string && data.mapLink.size() <= 1000 &&
+      data.dressCodeNote is string && data.dressCodeNote.size() <= 500 &&
+      data.rsvpDeadline is string && data.rsvpDeadline.size() <= 40 &&
+      data.registryNote is string && data.registryNote.size() <= 800 &&
+      data.registryUrl is string && data.registryUrl.size() <= 1000 &&
+      data.contactInfo is string && data.contactInfo.size() <= 300 &&
+      isValidThemeConfig(data.themeConfig) &&
+      isValidSectionSettings(data.sectionSettings) &&
+      data.viewsCount is number && data.viewsCount >= 0 &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    function isValidWeddingEvent(data, weddingId, eventId) {
+      return data.keys().hasAll([
+        'eventId', 'weddingId', 'ownerId', 'isPublic', 'name',
+        'description', 'date', 'startTime', 'endTime', 'venue',
+        'address', 'mapUrl', 'dressCode', 'sortOrder', 'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'eventId', 'weddingId', 'ownerId', 'isPublic', 'name',
+        'description', 'date', 'startTime', 'endTime', 'venue',
+        'address', 'mapUrl', 'dressCode', 'sortOrder', 'createdAt', 'updatedAt'
+      ]) &&
+      data.eventId is string && data.eventId.size() >= 1 && data.eventId.size() <= 128 &&
+      data.eventId == eventId &&
+      data.weddingId is string && data.weddingId.size() >= 1 && data.weddingId.size() <= 128 &&
+      data.weddingId == weddingId &&
+      data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 &&
+      data.ownerId == request.auth.uid &&
+      data.isPublic is bool &&
+      data.name is string && data.name.size() >= 1 && data.name.size() <= 120 &&
+      data.description is string && data.description.size() <= 1000 &&
+      data.date is string && data.date.size() >= 4 && data.date.size() <= 40 &&
+      data.startTime is string && data.startTime.size() >= 1 && data.startTime.size() <= 20 &&
+      data.endTime is string && data.endTime.size() <= 20 &&
+      data.venue is string && data.venue.size() >= 1 && data.venue.size() <= 200 &&
+      data.address is string && data.address.size() <= 300 &&
+      data.mapUrl is string && data.mapUrl.size() <= 1000 &&
+      data.dressCode is string && data.dressCode.size() <= 150 &&
+      data.sortOrder is number && data.sortOrder >= 0 && data.sortOrder <= 100 &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    function isValidGuest(data, weddingId, guestId) {
+      return data.keys().hasAll([
+        'guestId', 'weddingId', 'ownerId', 'name', 'contact',
+        'inviteCode', 'rsvpStatus', 'attendingCount', 'mealPreference',
+        'dietaryNotes', 'selectedEvents', 'checkedIn', 'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'guestId', 'weddingId', 'ownerId', 'name', 'contact',
+        'inviteCode', 'rsvpStatus', 'attendingCount', 'mealPreference',
+        'dietaryNotes', 'selectedEvents', 'checkedIn', 'createdAt', 'updatedAt'
+      ]) &&
+      data.guestId is string && data.guestId.size() >= 1 && data.guestId.size() <= 128 &&
+      data.guestId == guestId &&
+      data.weddingId is string && data.weddingId.size() >= 1 && data.weddingId.size() <= 128 &&
+      data.weddingId == weddingId &&
+      data.ownerId is string && data.ownerId.size() >= 1 && data.ownerId.size() <= 128 &&
+      data.ownerId == request.auth.uid &&
+      data.name is string && data.name.size() >= 1 && data.name.size() <= 120 &&
+      data.contact is string && data.contact.size() <= 200 &&
+      data.inviteCode is string && data.inviteCode.size() >= 4 && data.inviteCode.size() <= 64 &&
+      data.inviteCode.matches('^[a-zA-Z0-9_\\-]+$') &&
+      data.rsvpStatus is string && data.rsvpStatus.size() <= 20 &&
+      (data.rsvpStatus == 'pending' || data.rsvpStatus == 'accepted' || data.rsvpStatus == 'declined' || data.rsvpStatus == 'maybe') &&
+      data.attendingCount is number && data.attendingCount >= 0 && data.attendingCount <= 20 &&
+      data.mealPreference is string && data.mealPreference.size() <= 100 &&
+      data.dietaryNotes is string && data.dietaryNotes.size() <= 500 &&
+      data.selectedEvents is list && data.selectedEvents.size() <= 15 &&
+      (data.selectedEvents.size() == 0 || (data.selectedEvents[0] is string && data.selectedEvents[0].size() <= 120)) &&
+      data.checkedIn is bool &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    function isValidRsvpSubmission(data, weddingId, rsvpId) {
+      return data.keys().hasAll([
+        'rsvpId', 'weddingId', 'weddingOwnerId', 'guestName', 'contact',
+        'response', 'attendingCount', 'selectedEvents', 'mealPreference',
+        'dietaryNotes', 'message', 'inviteCode', 'submittedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'rsvpId', 'weddingId', 'weddingOwnerId', 'guestName', 'contact',
+        'response', 'attendingCount', 'selectedEvents', 'mealPreference',
+        'dietaryNotes', 'message', 'inviteCode', 'submittedAt'
+      ]) &&
+      data.rsvpId is string && data.rsvpId.size() >= 1 && data.rsvpId.size() <= 128 &&
+      data.rsvpId == rsvpId &&
+      data.weddingId is string && data.weddingId.size() >= 1 && data.weddingId.size() <= 128 &&
+      data.weddingId == weddingId &&
+      data.weddingOwnerId is string && data.weddingOwnerId.size() >= 1 && data.weddingOwnerId.size() <= 128 &&
+      data.weddingOwnerId.matches('^[a-zA-Z0-9_\\-]+$') &&
+      data.guestName is string && data.guestName.size() >= 1 && data.guestName.size() <= 120 &&
+      data.contact is string && data.contact.size() >= 3 && data.contact.size() <= 200 &&
+      data.response is string && data.response.size() <= 20 &&
+      (data.response == 'accepted' || data.response == 'declined' || data.response == 'maybe') &&
+      data.attendingCount is number && data.attendingCount >= 0 && data.attendingCount <= 20 &&
+      data.selectedEvents is list && data.selectedEvents.size() <= 15 &&
+      (data.selectedEvents.size() == 0 || (data.selectedEvents[0] is string && data.selectedEvents[0].size() <= 120)) &&
+      data.mealPreference is string && data.mealPreference.size() <= 100 &&
+      data.dietaryNotes is string && data.dietaryNotes.size() <= 500 &&
+      data.message is string && data.message.size() <= 1000 &&
+      data.inviteCode is string && data.inviteCode.size() >= 4 && data.inviteCode.size() <= 64 &&
+      data.inviteCode.matches('^[a-zA-Z0-9_\\-]+$') &&
+      data.submittedAt is timestamp;
+    }
+
+    // =========================================================================
+    // Collection Rules
+    // =========================================================================
+
+    // 1. /users/{userId} (PII Isolated to Owner Only)
+    match /users/{userId} {
+      allow get: if isSignedIn() && isValidId(userId) && request.auth.uid == userId;
+      allow list: if false;
+
+      allow create: if isVerifiedUser() &&
+        isValidId(userId) &&
+        isValidUser(incoming(), userId) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+
+      allow update: if isVerifiedUser() &&
+        isValidId(userId) &&
+        isValidUser(incoming(), userId) &&
+        existing().uid == request.auth.uid &&
+        incoming().uid == existing().uid &&
+        incoming().email == existing().email &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        (
+          // Action 1: Update profile & favorite templates
+          incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'favoriteTemplates', 'updatedAt']) ||
+          // Action 2: Upgrade or change subscription plan
+          incoming().diff(existing()).affectedKeys().hasOnly(['subscriptionPlan', 'updatedAt'])
+        );
+
+      allow delete: if false;
+    }
+
+    // 2. /weddings/{weddingId}
+    match /weddings/{weddingId} {
+      allow get: if isValidId(weddingId) && (
+        (isSignedIn() && existing().ownerId == request.auth.uid) ||
+        existing().status == 'published'
+      );
+
+      allow list: if (isSignedIn() && existing().ownerId == request.auth.uid) ||
+        (existing().status == 'published' && existing().isPrivate == false);
+
+      allow create: if isVerifiedUser() &&
+        isValidId(weddingId) &&
+        isValidWedding(incoming(), weddingId) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid));
+
+      allow update: if isVerifiedUser() &&
+        isValidId(weddingId) &&
+        isValidWedding(incoming(), weddingId) &&
+        existing().ownerId == request.auth.uid &&
+        incoming().weddingId == existing().weddingId &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        (
+          // Action 1: Full editor or wizard save
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'partnerOne', 'partnerTwo', 'familyOne', 'familyTwo',
+            'weddingDate', 'timezone', 'templateId', 'slug', 'status',
+            'isPrivate', 'accessPasscode', 'language', 'headline',
+            'invitationWording', 'story', 'coverPhotoUrl', 'couplePhotoUrl',
+            'venueSummary', 'cityCountry', 'mapLink', 'dressCodeNote',
+            'rsvpDeadline', 'registryNote', 'registryUrl', 'contactInfo',
+            'themeConfig', 'sectionSettings', 'viewsCount', 'updatedAt'
+          ]) ||
+          // Action 2: Publication status toggle
+          incoming().diff(existing()).affectedKeys().hasOnly(['status', 'isPrivate', 'accessPasscode', 'slug', 'updatedAt'])
+        );
+
+      allow delete: if isVerifiedUser() &&
+        isValidId(weddingId) &&
+        existing().ownerId == request.auth.uid;
+
+      // 3. /weddings/{weddingId}/events/{eventId}
+      match /events/{eventId} {
+        allow get: if isValidId(weddingId) && isValidId(eventId) && (
+          (isSignedIn() && existing().ownerId == request.auth.uid &&
+            get(/databases/$(database)/documents/weddings/$(weddingId)).data.ownerId == request.auth.uid) ||
+          (existing().isPublic == true &&
+            get(/databases/$(database)/documents/weddings/$(weddingId)).data.status == 'published')
+        );
+
+        // Pillar 8 Cost-Optimization: No get() inside list; evaluates resource.data directly
+        allow list: if (isSignedIn() && existing().ownerId == request.auth.uid) ||
+          existing().isPublic == true;
+
+        allow create: if isVerifiedUser() &&
+          isValidId(weddingId) &&
+          isValidId(eventId) &&
+          isValidWeddingEvent(incoming(), weddingId, eventId) &&
+          incoming().createdAt == request.time &&
+          incoming().updatedAt == request.time &&
+          exists(/databases/$(database)/documents/weddings/$(weddingId)) &&
+          get(/databases/$(database)/documents/weddings/$(weddingId)).data.ownerId == request.auth.uid;
+
+        allow update: if isVerifiedUser() &&
+          isValidId(weddingId) &&
+          isValidId(eventId) &&
+          isValidWeddingEvent(incoming(), weddingId, eventId) &&
+          existing().ownerId == request.auth.uid &&
+          incoming().eventId == existing().eventId &&
+          incoming().weddingId == existing().weddingId &&
+          incoming().ownerId == existing().ownerId &&
+          incoming().createdAt == existing().createdAt &&
+          incoming().updatedAt == request.time &&
+          get(/databases/$(database)/documents/weddings/$(weddingId)).data.ownerId == request.auth.uid &&
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'isPublic', 'name', 'description', 'date', 'startTime',
+            'endTime', 'venue', 'address', 'mapUrl', 'dressCode',
+            'sortOrder', 'updatedAt'
+          ]);
+
+        allow delete: if isVerifiedUser() &&
+          isValidId(weddingId) &&
+          isValidId(eventId) &&
+          existing().ownerId == request.auth.uid &&
+          get(/databases/$(database)/documents/weddings/$(weddingId)).data.ownerId == request.auth.uid;
+      }
+
+      // 4. /weddings/{weddingId}/guests/{guestId} (PII Isolated to Wedding Owner)
+      match /guests/{guestId} {
+        allow get: if isSignedIn() &&
+          isValidId(weddingId) &&
+          isValidId(guestId) &&
+          existing().ownerId == request.auth.uid &&
+          get(/databases/$(database)/documents/weddings/$(weddingId)).data.ownerId == request.auth.uid;
+
+        allow list: if isSignedIn() && existing().ownerId == request.auth.uid;
+
+        allow create: if isVerifiedUser() &&
+          isValidId(weddingId) &&
+          isValidId(guestId) &&
+          isValidGuest(incoming(), weddingId, guestId) &&
+          incoming().createdAt == request.time &&
+          incoming().updatedAt == request.time &&
+          exists(/databases/$(database)/documents/weddings/$(weddingId)) &&
+          get(/databases/$(database)/documents/weddings/$(weddingId)).data.ownerId == request.auth.uid;
+
+        allow update: if isVerifiedUser() &&
+          isValidId(weddingId) &&
+          isValidId(guestId) &&
+          isValidGuest(incoming(), weddingId, guestId) &&
+          existing().ownerId == request.auth.uid &&
+          incoming().guestId == existing().guestId &&
+          incoming().weddingId == existing().weddingId &&
+          incoming().ownerId == existing().ownerId &&
+          incoming().inviteCode == existing().inviteCode &&
+          incoming().createdAt == existing().createdAt &&
+          incoming().updatedAt == request.time &&
+          get(/databases/$(database)/documents/weddings/$(weddingId)).data.ownerId == request.auth.uid &&
+          (
+            // Action 1: Check-in toggle via QR scanner
+            incoming().diff(existing()).affectedKeys().hasOnly(['checkedIn', 'updatedAt']) ||
+            // Action 2: Guest details & RSVP status update by owner
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'name', 'contact', 'rsvpStatus', 'attendingCount',
+              'mealPreference', 'dietaryNotes', 'selectedEvents',
+              'checkedIn', 'updatedAt'
+            ])
+          );
+
+        allow delete: if isVerifiedUser() &&
+          isValidId(weddingId) &&
+          isValidId(guestId) &&
+          existing().ownerId == request.auth.uid &&
+          get(/databases/$(database)/documents/weddings/$(weddingId)).data.ownerId == request.auth.uid;
+      }
+
+      // 5. /weddings/{weddingId}/rsvps/{rsvpId} (Public Create on Published Wedding; Owner-Only Read)
+      match /rsvps/{rsvpId} {
+        allow get: if isSignedIn() &&
+          isValidId(weddingId) &&
+          isValidId(rsvpId) &&
+          existing().weddingOwnerId == request.auth.uid &&
+          get(/databases/$(database)/documents/weddings/$(weddingId)).data.ownerId == request.auth.uid;
+
+        allow list: if isSignedIn() && existing().weddingOwnerId == request.auth.uid;
+
+        allow create: if isValidId(weddingId) &&
+          isValidId(rsvpId) &&
+          isValidRsvpSubmission(incoming(), weddingId, rsvpId) &&
+          incoming().submittedAt == request.time &&
+          exists(/databases/$(database)/documents/weddings/$(weddingId)) &&
+          get(/databases/$(database)/documents/weddings/$(weddingId)).data.status == 'published' &&
+          incoming().weddingOwnerId == get(/databases/$(database)/documents/weddings/$(weddingId)).data.ownerId;
+
+        allow update: if false;
+
+        allow delete: if isVerifiedUser() &&
+          isValidId(weddingId) &&
+          isValidId(rsvpId) &&
+          existing().weddingOwnerId == request.auth.uid &&
+          get(/databases/$(database)/documents/weddings/$(weddingId)).data.ownerId == request.auth.uid;
+      }
+    }
+  }
+}

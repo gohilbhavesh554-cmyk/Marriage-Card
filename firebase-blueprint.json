@@ -1,0 +1,596 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Authenticated VOWORA user profile and subscription state.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the user.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Display name of the user.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Email address of the user (PII isolated to owner).",
+          "minLength": 3,
+          "maxLength": 254
+        },
+        "subscriptionPlan": {
+          "type": "string",
+          "description": "Current entitlement plan.",
+          "enum": ["free", "premium"],
+          "maxLength": 20
+        },
+        "favoriteTemplates": {
+          "type": "array",
+          "description": "Bounded list of favorite template IDs (max 20).",
+          "maxLength": 20
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of user creation."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of last profile update."
+        }
+      },
+      "required": ["uid", "displayName", "email", "subscriptionPlan", "favoriteTemplates", "createdAt", "updatedAt"]
+    },
+    "Wedding": {
+      "title": "Wedding",
+      "description": "A digital wedding invitation and website project created by a user.",
+      "type": "object",
+      "properties": {
+        "weddingId": {
+          "type": "string",
+          "description": "Unique identifier of the wedding project.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "UID of the user who owns this wedding project.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "partnerOne": {
+          "type": "string",
+          "description": "First partner name.",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "partnerTwo": {
+          "type": "string",
+          "description": "Second partner name.",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "familyOne": {
+          "type": "string",
+          "description": "Optional family hosts description for partner one.",
+          "maxLength": 250
+        },
+        "familyTwo": {
+          "type": "string",
+          "description": "Optional family hosts description for partner two.",
+          "maxLength": 250
+        },
+        "weddingDate": {
+          "type": "string",
+          "description": "ISO date string for the primary wedding celebration.",
+          "minLength": 4,
+          "maxLength": 40
+        },
+        "timezone": {
+          "type": "string",
+          "description": "IANA timezone identifier for the wedding events.",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "templateId": {
+          "type": "string",
+          "description": "Selected template ID from the VOWORA gallery.",
+          "minLength": 2,
+          "maxLength": 64
+        },
+        "slug": {
+          "type": "string",
+          "description": "Public URL slug for /i/:slug.",
+          "minLength": 2,
+          "maxLength": 100,
+          "pattern": "^[a-z0-9\\-]+$"
+        },
+        "status": {
+          "type": "string",
+          "description": "Publication status of the wedding project.",
+          "enum": ["draft", "published"],
+          "maxLength": 20
+        },
+        "isPrivate": {
+          "type": "boolean",
+          "description": "Whether the published wedding website requires an access passcode."
+        },
+        "accessPasscode": {
+          "type": "string",
+          "description": "Optional guest passcode when isPrivate is enabled.",
+          "maxLength": 64
+        },
+        "language": {
+          "type": "string",
+          "description": "Primary invitation language code.",
+          "enum": ["en", "hi", "gu"],
+          "maxLength": 10
+        },
+        "headline": {
+          "type": "string",
+          "description": "Romantic editorial headline displayed on the invitation.",
+          "maxLength": 300
+        },
+        "invitationWording": {
+          "type": "string",
+          "description": "Formal or personal invitation wording.",
+          "maxLength": 1500
+        },
+        "story": {
+          "type": "string",
+          "description": "The couple's love story narrative.",
+          "maxLength": 3000
+        },
+        "coverPhotoUrl": {
+          "type": "string",
+          "description": "URL or path of the primary cover photograph.",
+          "maxLength": 2000
+        },
+        "couplePhotoUrl": {
+          "type": "string",
+          "description": "URL or path of the secondary couple portrait.",
+          "maxLength": 2000
+        },
+        "venueSummary": {
+          "type": "string",
+          "description": "Primary venue name.",
+          "maxLength": 300
+        },
+        "cityCountry": {
+          "type": "string",
+          "description": "City and country of the celebration.",
+          "maxLength": 160
+        },
+        "mapLink": {
+          "type": "string",
+          "description": "Directions URL for the primary venue.",
+          "maxLength": 1000
+        },
+        "dressCodeNote": {
+          "type": "string",
+          "description": "Attire and dress code guidance for guests.",
+          "maxLength": 500
+        },
+        "rsvpDeadline": {
+          "type": "string",
+          "description": "Deadline date for guest RSVPs.",
+          "maxLength": 40
+        },
+        "registryNote": {
+          "type": "string",
+          "description": "Optional blessing or registry message.",
+          "maxLength": 800
+        },
+        "registryUrl": {
+          "type": "string",
+          "description": "Optional link to a wedding registry.",
+          "maxLength": 1000
+        },
+        "contactInfo": {
+          "type": "string",
+          "description": "Public wedding concierge or family contact line.",
+          "maxLength": 300
+        },
+        "themeConfig": {
+          "type": "object",
+          "description": "Typography, palette, alignment, and spacing customization map."
+        },
+        "sectionSettings": {
+          "type": "object",
+          "description": "Visibility toggles for invitation website sections."
+        },
+        "viewsCount": {
+          "type": "number",
+          "description": "Counter of invitation views."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of creation."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of last modification."
+        }
+      },
+      "required": [
+        "weddingId",
+        "ownerId",
+        "partnerOne",
+        "partnerTwo",
+        "familyOne",
+        "familyTwo",
+        "weddingDate",
+        "timezone",
+        "templateId",
+        "slug",
+        "status",
+        "isPrivate",
+        "accessPasscode",
+        "language",
+        "headline",
+        "invitationWording",
+        "story",
+        "coverPhotoUrl",
+        "couplePhotoUrl",
+        "venueSummary",
+        "cityCountry",
+        "mapLink",
+        "dressCodeNote",
+        "rsvpDeadline",
+        "registryNote",
+        "registryUrl",
+        "contactInfo",
+        "themeConfig",
+        "sectionSettings",
+        "viewsCount",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "WeddingEvent": {
+      "title": "WeddingEvent",
+      "description": "An individual wedding function or ceremony within a wedding project.",
+      "type": "object",
+      "properties": {
+        "eventId": {
+          "type": "string",
+          "description": "Unique event ID.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "weddingId": {
+          "type": "string",
+          "description": "Parent wedding project ID.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "UID of the wedding project owner.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "isPublic": {
+          "type": "boolean",
+          "description": "Whether this event can be listed on the public invitation."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the ceremony or function (e.g. Sangeet, Ceremony).",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "description": {
+          "type": "string",
+          "description": "Description and notes for the event.",
+          "maxLength": 1000
+        },
+        "date": {
+          "type": "string",
+          "description": "Date of the function.",
+          "minLength": 4,
+          "maxLength": 40
+        },
+        "startTime": {
+          "type": "string",
+          "description": "Start time string.",
+          "minLength": 1,
+          "maxLength": 20
+        },
+        "endTime": {
+          "type": "string",
+          "description": "End time string.",
+          "maxLength": 20
+        },
+        "venue": {
+          "type": "string",
+          "description": "Venue name.",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "address": {
+          "type": "string",
+          "description": "Full venue address.",
+          "maxLength": 300
+        },
+        "mapUrl": {
+          "type": "string",
+          "description": "Directions link.",
+          "maxLength": 1000
+        },
+        "dressCode": {
+          "type": "string",
+          "description": "Suggested attire for this function.",
+          "maxLength": 150
+        },
+        "sortOrder": {
+          "type": "number",
+          "description": "Numeric ordering index."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of creation."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of update."
+        }
+      },
+      "required": [
+        "eventId",
+        "weddingId",
+        "ownerId",
+        "isPublic",
+        "name",
+        "description",
+        "date",
+        "startTime",
+        "endTime",
+        "venue",
+        "address",
+        "mapUrl",
+        "dressCode",
+        "sortOrder",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Guest": {
+      "title": "Guest",
+      "description": "Private guest list record managed by the wedding owner.",
+      "type": "object",
+      "properties": {
+        "guestId": {
+          "type": "string",
+          "description": "Unique guest ID.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "weddingId": {
+          "type": "string",
+          "description": "Parent wedding ID.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "UID of the wedding owner.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "name": {
+          "type": "string",
+          "description": "Full name of the guest.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "contact": {
+          "type": "string",
+          "description": "Email or phone number of the guest (PII).",
+          "maxLength": 200
+        },
+        "inviteCode": {
+          "type": "string",
+          "description": "Unique entry/QR code token for check-in.",
+          "minLength": 4,
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "rsvpStatus": {
+          "type": "string",
+          "description": "Current RSVP status.",
+          "enum": ["pending", "accepted", "declined", "maybe"],
+          "maxLength": 20
+        },
+        "attendingCount": {
+          "type": "number",
+          "description": "Number of guests attending in this party."
+        },
+        "mealPreference": {
+          "type": "string",
+          "description": "Selected meal preference.",
+          "maxLength": 100
+        },
+        "dietaryNotes": {
+          "type": "string",
+          "description": "Allergies or dietary notes.",
+          "maxLength": 500
+        },
+        "selectedEvents": {
+          "type": "array",
+          "description": "Bounded list of event names or IDs the guest is attending (max 15).",
+          "maxLength": 15
+        },
+        "checkedIn": {
+          "type": "boolean",
+          "description": "Whether the guest has been checked in via QR pass."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of creation."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of update."
+        }
+      },
+      "required": [
+        "guestId",
+        "weddingId",
+        "ownerId",
+        "name",
+        "contact",
+        "inviteCode",
+        "rsvpStatus",
+        "attendingCount",
+        "mealPreference",
+        "dietaryNotes",
+        "selectedEvents",
+        "checkedIn",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "RsvpSubmission": {
+      "title": "RsvpSubmission",
+      "description": "Guest RSVP submission submitted from the public wedding website.",
+      "type": "object",
+      "properties": {
+        "rsvpId": {
+          "type": "string",
+          "description": "Unique RSVP submission ID.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "weddingId": {
+          "type": "string",
+          "description": "Parent wedding ID.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "weddingOwnerId": {
+          "type": "string",
+          "description": "UID of the wedding owner so owner can list RSVPs securely.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "guestName": {
+          "type": "string",
+          "description": "Full name of the responding guest.",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "contact": {
+          "type": "string",
+          "description": "Email or phone of the responding guest (PII).",
+          "minLength": 3,
+          "maxLength": 200
+        },
+        "response": {
+          "type": "string",
+          "description": "RSVP decision.",
+          "enum": ["accepted", "declined", "maybe"],
+          "maxLength": 20
+        },
+        "attendingCount": {
+          "type": "number",
+          "description": "Total attending guests."
+        },
+        "selectedEvents": {
+          "type": "array",
+          "description": "Bounded list of selected wedding events (max 15).",
+          "maxLength": 15
+        },
+        "mealPreference": {
+          "type": "string",
+          "description": "Selected meal preference.",
+          "maxLength": 100
+        },
+        "dietaryNotes": {
+          "type": "string",
+          "description": "Dietary notes or allergies.",
+          "maxLength": 500
+        },
+        "message": {
+          "type": "string",
+          "description": "Personal note or blessing for the couple.",
+          "maxLength": 1000
+        },
+        "inviteCode": {
+          "type": "string",
+          "description": "Generated QR entry pass code for the guest.",
+          "minLength": 4,
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "submittedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of RSVP submission."
+        }
+      },
+      "required": [
+        "rsvpId",
+        "weddingId",
+        "weddingOwnerId",
+        "guestName",
+        "contact",
+        "response",
+        "attendingCount",
+        "selectedEvents",
+        "mealPreference",
+        "dietaryNotes",
+        "message",
+        "inviteCode",
+        "submittedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles containing personal email and subscription plan."
+    },
+    "/weddings/{weddingId}": {
+      "schema": "Wedding",
+      "description": "Top-level wedding projects created by couples."
+    },
+    "/weddings/{weddingId}/events/{eventId}": {
+      "schema": "WeddingEvent",
+      "description": "Subcollection of ceremony and celebration events belonging to a wedding."
+    },
+    "/weddings/{weddingId}/guests/{guestId}": {
+      "schema": "Guest",
+      "description": "Private guest list and check-in statuses managed by the wedding owner."
+    },
+    "/weddings/{weddingId}/rsvps/{rsvpId}": {
+      "schema": "RsvpSubmission",
+      "description": "Guest RSVP responses submitted on published wedding pages, readable only by the wedding owner."
+    }
+  }
+}
