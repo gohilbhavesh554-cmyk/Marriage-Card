@@ -150,36 +150,20 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
     }
   }, [initialProject, initialEvents, isEditorPreview]);
 
-  // Apply one of the 5 curated USA/European templates immediately
+  // Apply one of the 5 curated templates while keeping the couple name the same
   const handleSelectTemplatePreset = (preset: CuratedCardPreset) => {
     setActivePresetId(preset.id);
-    setCardState({
-      partnerOne: preset.partnerOne,
-      partnerTwo: preset.partnerTwo,
-      dateRangeLabel: preset.dateRangeLabel,
-      weddingDate: preset.weddingDate,
-      dayNumber: preset.dayNumber,
-      monthShort: preset.monthShort,
-      monthFull: preset.monthFull,
-      yearNumber: preset.yearNumber,
-      weekdayLabel: preset.weekdayLabel,
-      ceremonySubtitle: preset.ceremonySubtitle,
-      archPhotoUrl: preset.archPhotoUrl,
-      venuePhotoUrl: preset.venuePhotoUrl,
-      couplePortraitUrl: preset.couplePortraitUrl,
-      venueKicker: preset.venueKicker,
-      venueName: preset.venueName,
-      venueAddress: preset.venueAddress,
-      venueParkingNote: preset.venueParkingNote,
-      mapEmbedQuery: preset.mapEmbedQuery,
+    setCardState((prev) => ({
+      ...prev,
+      partnerOne: prev.partnerOne,
+      partnerTwo: prev.partnerTwo,
       primaryColor: preset.primaryColor,
       accentColor: preset.accentColor,
       foilColorStart: preset.foilColorStart,
       foilColorEnd: preset.foilColorEnd,
       petalColor: preset.petalColor,
       bgColor: preset.bgColor,
-      events: [...preset.events],
-    });
+    }));
     playSparkleChime();
   };
 
@@ -615,19 +599,19 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
             }}
           />
 
-          {/* Frosted White Floating Couple Card inside upper-middle of Arch */}
-          <div className="absolute inset-x-6 sm:inset-x-12 top-[15%] sm:top-[16%] flex justify-center">
+          {/* Translucent Frosted Glass Floating Couple Card with Matching Half-Round Arch Top */}
+          <div className="absolute inset-x-6 sm:inset-x-12 top-[11%] sm:top-[12%] flex justify-center">
             <motion.div
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25, duration: 0.8 }}
-              className="w-full max-w-[360px] rounded-3xl bg-white/92 backdrop-blur-md px-6 py-8 sm:px-9 sm:py-10 shadow-[0_14px_40px_rgba(0,0,0,0.08)] border border-white text-center"
+              className="w-full max-w-[345px] sm:max-w-[365px] rounded-t-[190px] rounded-b-3xl bg-white/38 backdrop-blur-md px-6 pt-12 pb-8 sm:px-9 sm:pt-14 sm:pb-9 shadow-[0_12px_36px_rgba(22,50,91,0.12),inset_0_1px_1.5px_rgba(255,255,255,0.85)] border border-white/65 text-center"
             >
               <h1
-                className="text-4xl sm:text-[46px] font-bold leading-[1.12] tracking-tight"
+                className="text-4xl sm:text-[46px] font-bold leading-[1.12] tracking-tight drop-shadow-[0_1px_8px_rgba(255,255,255,0.65)]"
                 style={{
                   fontFamily: `'Playfair Display', Georgia, serif`,
-                  color: '#25231F',
+                  color: '#1E1C18',
                 }}
               >
                 {cardState.partnerOne} &amp;
@@ -636,7 +620,7 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
               </h1>
 
               <p
-                className="mt-3 text-base sm:text-lg italic text-[#6D675E]"
+                className="mt-3 text-base sm:text-lg italic text-[#3E3A34] font-medium"
                 style={{ fontFamily: `'Cormorant Garamond', Georgia, serif` }}
               >
                 are getting married!
@@ -644,15 +628,15 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
 
               {/* — ♡ — divider */}
               <div className="my-4 flex items-center justify-center gap-2.5">
-                <span className="w-6 h-px bg-[#D9CFC2]" />
+                <span className="w-6 h-px bg-[#1E1C18]/30" />
                 <Heart
-                  className="w-3.5 h-3.5 fill-[#F3B6AF] text-[#D98A82]"
+                  className="w-3.5 h-3.5 fill-[#F3B6AF] text-[#C9736B]"
                   strokeWidth={1.8}
                 />
-                <span className="w-6 h-px bg-[#D9CFC2]" />
+                <span className="w-6 h-px bg-[#1E1C18]/30" />
               </div>
 
-              <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.22em] font-semibold text-[#5E584F] leading-relaxed">
+              <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.22em] font-bold text-[#2F2B26] leading-relaxed">
                 {cardState.dateRangeLabel} · MARRIAGE
                 <br />
                 CELEBRATION
@@ -1274,15 +1258,15 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
           strokeWidth={1.6}
         />
 
-        {/* Framed Vertical Rounded Couple Portrait Card with Bottom Caption */}
+        {/* Framed Vertical Half-Round Arch Couple Portrait Card with Bottom Caption */}
         <motion.div
           initial={{ opacity: 0, scale: 0.97, y: 20 }}
           whileInView={{ opacity: 1, scale: 1, y: 0 }}
           viewport={{ once: true, amount: 0.25 }}
           transition={{ duration: 0.75 }}
-          className="relative w-full max-w-[360px] sm:max-w-[390px] h-[470px] sm:h-[510px] rounded-3xl overflow-hidden bg-white p-2.5 shadow-[0_20px_50px_rgba(22,50,91,0.12)] border border-[#EAE2D6]"
+          className="relative w-full max-w-[360px] sm:max-w-[390px] h-[480px] sm:h-[520px] rounded-t-full rounded-b-3xl overflow-hidden bg-white p-2.5 shadow-[0_20px_50px_rgba(22,50,91,0.12)] border border-[#EAE2D6]"
         >
-          <div className="relative w-full h-full rounded-2xl overflow-hidden">
+          <div className="relative w-full h-full rounded-t-full rounded-b-2xl overflow-hidden">
             <img
               src={cardState.couplePortraitUrl || ASSETS.COUPLE_EUROPEAN_VILLA}
               alt={`${cardState.partnerOne} & ${cardState.partnerTwo} Portrait`}
