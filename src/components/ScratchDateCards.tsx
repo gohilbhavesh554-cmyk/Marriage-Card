@@ -137,28 +137,28 @@ const SingleScratchCard: React.FC<ScratchCardItemProps> = ({
   return (
     <div className="flex flex-col items-center">
       <div
-        className="relative w-[112px] h-[126px] sm:w-[138px] sm:h-[152px] rounded-2xl bg-white shadow-[0_8px_28px_rgba(22,50,91,0.08)] border select-none overflow-hidden transition-transform duration-300 hover:scale-[1.02]"
+        className="relative w-[92px] h-[110px] sm:w-[138px] sm:h-[152px] rounded-2xl bg-white shadow-[0_10px_30px_rgba(22,50,91,0.09)] border select-none overflow-hidden transition-transform duration-300 hover:scale-[1.03]"
         style={{ borderColor: `${accentColor}38` }}
       >
         {/* Revealed Underneath Layer */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center p-3 text-center">
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-2 sm:p-3 text-center">
           <Sparkles
-            className="w-3.5 h-3.5 absolute top-2.5 right-2.5 opacity-70"
+            className="w-3 h-3 sm:w-3.5 sm:h-3.5 absolute top-2 right-2 sm:top-2.5 sm:right-2.5 opacity-70"
             style={{ color: accentColor }}
           />
           <div
-            className="text-2xl sm:text-4xl font-bold tracking-tight leading-none tabular-nums"
+            className="text-xl sm:text-4xl font-bold tracking-tight leading-none tabular-nums"
             style={{ color: primaryColor }}
           >
             {mainValue}
           </div>
           <div
-            className="text-[9px] sm:text-[10px] uppercase tracking-[0.18em] font-semibold mt-2"
+            className="text-[8px] sm:text-[10px] uppercase tracking-[0.16em] sm:tracking-[0.18em] font-semibold mt-1.5 sm:mt-2"
             style={{ color: accentColor }}
           >
             {subValue}
           </div>
-          <span className="text-[10px] mt-1.5 opacity-60" style={{ color: accentColor }}>
+          <span className="text-[9px] sm:text-[10px] mt-1 sm:mt-1.5 opacity-60" style={{ color: accentColor }}>
             ✦
           </span>
         </div>
@@ -201,7 +201,7 @@ const SingleScratchCard: React.FC<ScratchCardItemProps> = ({
         />
       </div>
 
-      <span className="mt-3 text-[11px] uppercase tracking-[0.24em] text-[#6E6A63] font-medium">
+      <span className="mt-2.5 sm:mt-3 text-[10px] sm:text-[11px] uppercase tracking-[0.22em] text-[#6E6A63] font-medium">
         {label}
       </span>
     </div>
@@ -264,10 +264,10 @@ export const ScratchDateCards: React.FC<ScratchDateCardsProps> = ({
   };
 
   return (
-    <div className="relative flex flex-col items-center">
+    <div className="relative w-full px-6 sm:px-10 mx-auto flex flex-col items-center">
       {/* Celebratory Confetti Particles when revealed (matching reference screenshot 3) */}
       {showConfetti && (
-        <div className="absolute -inset-x-12 -inset-y-8 pointer-events-none overflow-hidden z-20">
+        <div className="absolute -inset-x-6 -inset-y-8 pointer-events-none overflow-hidden z-20">
           {Array.from({ length: 28 }).map((_, i) => {
             const colors = [primaryColor, accentColor, '#E8B4B8', '#D4AF37', '#8ECAE6'];
             const left = `${(i * 3.7) % 100}%`;
@@ -288,7 +288,7 @@ export const ScratchDateCards: React.FC<ScratchDateCardsProps> = ({
         </div>
       )}
 
-      {/* 3 Scratch Cards Row */}
+      {/* 3 Scratch Cards Row with Generous Side Margins on Mobile */}
       <div className="flex items-center justify-center gap-3 sm:gap-6">
         <SingleScratchCard
           label="DAY"

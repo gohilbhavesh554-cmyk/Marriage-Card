@@ -299,6 +299,8 @@ STRICT RULES:
   } else {
     const distPath = path.join(__dirname, 'dist');
     app.use(express.static(distPath));
+    app.use('/src/assets', express.static(path.join(__dirname, 'src/assets')));
+    app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
     app.get('*', (_req, res) => {
       res.sendFile(path.join(distPath, 'index.html'));
     });

@@ -17,6 +17,12 @@ import {
   Navigation,
   Palette,
   X,
+  Plane,
+  Hotel,
+  Wine,
+  ChevronLeft,
+  ChevronRight,
+  Maximize2,
 } from 'lucide-react';
 import {
   WeddingProject,
@@ -42,6 +48,80 @@ interface InvitationCanvasProps {
   showTemplateBar?: boolean;
 }
 
+interface GalleryMomentItem {
+  id: string;
+  number: string;
+  title: string;
+  location: string;
+  caption: string;
+  imageUrl: string;
+  fallbackUrl: string;
+  objectPosition?: string;
+}
+
+const PRE_WEDDING_GALLERY_MOMENTS: GalleryMomentItem[] = [
+  {
+    id: 'gal-1',
+    number: '01',
+    title: 'Golden Hour at the Villa',
+    location: 'Lake Como · Italy',
+    caption: 'Strolling beneath the sunlit stone colonnade overlooking the tranquil waters.',
+    imageUrl: ASSETS.COUPLE_EUROPEAN_VILLA,
+    fallbackUrl: ASSETS.ARCH_LAKE_COMO,
+    objectPosition: 'center top',
+  },
+  {
+    id: 'gal-2',
+    number: '02',
+    title: 'Vineyard Estate Afternoon',
+    location: 'Napa Valley, California · USA',
+    caption: 'Warm California light and quiet laughter across the private estate gardens.',
+    imageUrl: ASSETS.COUPLE_USA_NAPA,
+    fallbackUrl: ASSETS.COUPLE_EUROPEAN_VILLA,
+    objectPosition: 'center center',
+  },
+  {
+    id: 'gal-3',
+    number: '03',
+    title: 'The Flower-Draped Loggia',
+    location: 'Villa del Balbianello · Italy',
+    caption: 'Where we will exchange our sacred marriage vows surrounded by white garden roses.',
+    imageUrl: ASSETS.ARCH_LAKE_COMO,
+    fallbackUrl: ASSETS.VENUE_VILLA_LAWN,
+    objectPosition: 'center center',
+  },
+  {
+    id: 'gal-4',
+    number: '04',
+    title: 'Mayfair to Manhattan',
+    location: 'London, UK & New York, USA',
+    caption: 'Celebrating a transatlantic love story that began in London and blossomed in New York.',
+    imageUrl: ASSETS.HERO_EDITORIAL,
+    fallbackUrl: ASSETS.COUPLE_EUROPEAN_VILLA,
+    objectPosition: 'center center',
+  },
+  {
+    id: 'gal-5',
+    number: '05',
+    title: 'Candlelit Reception Table',
+    location: 'The Lakefront Terrace',
+    caption: 'Beeswax tapers, vintage crystal, and heirloom florals prepared for our evening feast.',
+    imageUrl: ASSETS.TABLE_SETTING,
+    fallbackUrl: ASSETS.VENUE_VILLA_LAWN,
+    objectPosition: 'center center',
+  },
+  {
+    id: 'gal-6',
+    number: '06',
+    title: 'The Celebration Lawn',
+    location: 'Tremezzina · Lake Como',
+    caption: 'Private lakeside gardens awaiting our family and friends from the UK and USA.',
+    imageUrl: ASSETS.VENUE_VILLA_LAWN,
+    fallbackUrl: ASSETS.ARCH_LAKE_COMO,
+    objectPosition: 'center center',
+  },
+];
+
 export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
   project: initialProject,
   events: initialEvents,
@@ -62,7 +142,7 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
 
   const [activePresetId, setActivePresetId] = useState<string>(matchedPreset.id);
 
-  // Editable live card state so user can switch between the 5 templates or customize any detail live
+  // Editable live card state
   const [cardState, setCardState] = useState(() => ({
     partnerOne: initialProject.partnerOne || matchedPreset.partnerOne,
     partnerTwo: initialProject.partnerTwo || matchedPreset.partnerTwo,
@@ -151,8 +231,14 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
   }, [initialProject, initialEvents, isEditorPreview]);
 
   // Apply one of the 5 curated templates while keeping the couple name the same
-  const handleSelectTemplatePreset = (preset: CuratedCardPreset) => {
+  const handleSelectTemplatePreset = (preset: CuratedCardPreset, idx?: number) => {
     setActivePresetId(preset.id);
+    if (typeof idx === 'number') {
+      setActiveSwatchIdx(idx);
+    } else {
+      const foundIdx = CURATED_CARD_TEMPLATES.findIndex((p) => p.id === preset.id);
+      if (foundIdx !== -1) setActiveSwatchIdx(foundIdx);
+    }
     setCardState((prev) => ({
       ...prev,
       partnerOne: prev.partnerOne,
@@ -167,10 +253,20 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
     playSparkleChime();
   };
 
-  // UI Modal State
+  // UI Modal & Interactive Section State
   const [rsvpModalOpen, setRsvpModalOpen] = useState(false);
   const [showVenueMap, setShowVenueMap] = useState(true);
   const [copiedAddress, setCopiedAddress] = useState(false);
+  const [copiedHotelCode, setCopiedHotelCode] = useState(false);
+  const [activeSwatchIdx, setActiveSwatchIdx] = useState(() => {
+    const idx = CURATED_CARD_TEMPLATES.findIndex((p) => p.id === matchedPreset.id);
+    return idx !== -1 ? idx : 0;
+  });
+
+  // Interactive Scrolling Gallery State & Auto-Scroll Ref
+  const galleryScrollRef = useRef<HTMLDivElement | null>(null);
+  const [isGalleryPaused, setIsGalleryPaused] = useState(false);
+  const [activeLightboxMoment, setActiveLightboxMoment] = useState<GalleryMomentItem | null>(null);
 
   // Polyphonic Romantic Piano & Strings Web Audio Synthesizer
   const [isPlayingMusic, setIsPlayingMusic] = useState(false);
@@ -197,6 +293,48 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
   const [rsvpError, setRsvpError] = useState('');
   const [submittedRsvp, setSubmittedRsvp] = useState<RsvpRecord | null>(null);
 
+  // Interactive Guest Attire & Card Theme Swatches (clicking any swatch switches the entire card theme)
+  const attireSwatches = useMemo(
+    () => [
+      {
+        name: 'Regency Heritage Blue',
+        hex: CURATED_CARD_TEMPLATES[0].primaryColor,
+        accentHex: CURATED_CARD_TEMPLATES[0].accentColor,
+        preset: CURATED_CARD_TEMPLATES[0],
+        note: 'Tailored evening tuxedos, velvet dinner jackets, or floor-length silk gowns in classic Lake Como Regency Blue.',
+      },
+      {
+        name: 'English Garden Rosewood',
+        hex: CURATED_CARD_TEMPLATES[1].primaryColor,
+        accentHex: CURATED_CARD_TEMPLATES[1].accentColor,
+        preset: CURATED_CARD_TEMPLATES[1],
+        note: 'Romantic rosewood & blush chiffon, satin column dresses, or pocket square accents.',
+      },
+      {
+        name: 'Cotswold Olive & Gold',
+        hex: CURATED_CARD_TEMPLATES[2].primaryColor,
+        accentHex: CURATED_CARD_TEMPLATES[2].accentColor,
+        preset: CURATED_CARD_TEMPLATES[2],
+        note: 'Botanical olive greens and warm champagne gold ideal for garden vows and terrace cocktails.',
+      },
+      {
+        name: 'Parisian Noir & Pearl',
+        hex: CURATED_CARD_TEMPLATES[3].primaryColor,
+        accentHex: CURATED_CARD_TEMPLATES[3].accentColor,
+        preset: CURATED_CARD_TEMPLATES[3],
+        note: 'Timeless black-tie tuxedos, pearl organza silhouettes, and classic evening couture.',
+      },
+      {
+        name: 'Amalfi Azure & Terracotta',
+        hex: CURATED_CARD_TEMPLATES[4].primaryColor,
+        accentHex: CURATED_CARD_TEMPLATES[4].accentColor,
+        preset: CURATED_CARD_TEMPLATES[4],
+        note: 'Mediterranean coastal navy paired with warm sunset terracotta and silk eveningwear.',
+      },
+    ],
+    []
+  );
+
   // Live 1-second ticking countdown calculation
   useEffect(() => {
     const updateTimer = () => {
@@ -205,7 +343,6 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
       const diff = targetTime - now;
 
       if (Number.isNaN(targetTime) || diff <= 0) {
-        // Fallback so countdown always ticks live like the reference screenshot
         const fallbackSec = 59 - (Math.floor(now / 1000) % 60);
         setCountdown({ days: 33, hours: 23, mins: 19, secs: fallbackSec });
         return;
@@ -233,7 +370,9 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
 
   const ensureAudioCtx = () => {
     if (!audioCtxRef.current) {
-      const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const AudioContextClass =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       audioCtxRef.current = new AudioContextClass();
     }
     if (audioCtxRef.current.state === 'suspended') {
@@ -242,7 +381,7 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
     return audioCtxRef.current;
   };
 
-  // Gentle sparkle chime when scratching the date card
+  // Gentle sparkle chime when scratching the date card or posting a wish
   const playSparkleChime = () => {
     try {
       const ctx = ensureAudioCtx();
@@ -270,20 +409,15 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
     try {
       const ctx = ensureAudioCtx();
       const progressions = [
-        // C major warm voicing
         { bass: 130.81, notes: [261.63, 329.63, 392.0, 523.25] },
-        // G major warm voicing
         { bass: 98.0, notes: [246.94, 293.66, 392.0, 493.88] },
-        // A minor 7 warm voicing
         { bass: 110.0, notes: [220.0, 261.63, 329.63, 440.0] },
-        // F major 7 warm voicing
         { bass: 87.31, notes: [220.0, 261.63, 349.23, 523.25] },
       ];
 
       const bar = progressions[stepIndexRef.current % progressions.length];
       stepIndexRef.current += 1;
 
-      // Warm cello/pad bass note
       const bassOsc = ctx.createOscillator();
       const bassGain = ctx.createGain();
       bassOsc.type = 'triangle';
@@ -296,7 +430,6 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
       bassOsc.start(ctx.currentTime);
       bassOsc.stop(ctx.currentTime + 3.5);
 
-      // Arpeggiated piano notes
       bar.notes.forEach((freq, idx) => {
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -356,6 +489,51 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
     navigator.clipboard.writeText(`${cardState.venueName}, ${cardState.venueAddress}`);
     setCopiedAddress(true);
     setTimeout(() => setCopiedAddress(false), 2400);
+  };
+
+  // Copy Hotel Room Block Code
+  const handleCopyHotelCode = () => {
+    navigator.clipboard.writeText('JULIANCLARA26');
+    setCopiedHotelCode(true);
+    playSparkleChime();
+    setTimeout(() => setCopiedHotelCode(false), 2400);
+  };
+
+  // Smooth continuous auto-scroll for the Pre-Wedding Scrolling Gallery
+  useEffect(() => {
+    const container = galleryScrollRef.current;
+    if (!container || isGalleryPaused || activeLightboxMoment) return;
+
+    let animationFrameId: number;
+    let lastTimestamp = 0;
+
+    const step = (timestamp: number) => {
+      if (!lastTimestamp) lastTimestamp = timestamp;
+      const elapsed = timestamp - lastTimestamp;
+
+      if (elapsed >= 24) {
+        lastTimestamp = timestamp;
+        if (container.scrollWidth > container.clientWidth) {
+          container.scrollLeft += 0.9;
+          // Loop seamlessly when reaching half of the duplicated track
+          const halfTrack = container.scrollWidth / 2;
+          if (container.scrollLeft >= halfTrack) {
+            container.scrollLeft -= halfTrack;
+          }
+        }
+      }
+      animationFrameId = window.requestAnimationFrame(step);
+    };
+
+    animationFrameId = window.requestAnimationFrame(step);
+    return () => window.cancelAnimationFrame(animationFrameId);
+  }, [isGalleryPaused, activeLightboxMoment]);
+
+  const handleScrollGallery = (direction: 'left' | 'right') => {
+    const container = galleryScrollRef.current;
+    if (!container) return;
+    const offset = direction === 'left' ? -320 : 320;
+    container.scrollBy({ left: offset, behavior: 'smooth' });
   };
 
   // RSVP Submit
@@ -423,7 +601,7 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
         fontFamily: `'DM Sans', sans-serif`,
       }}
     >
-      {/* Floating Rose/Blush Petals Background Animation (exact reference match) */}
+      {/* Floating Rose/Blush Petals Background Animation */}
       <FallingPetals color={cardState.petalColor} />
 
       {/* =====================================================================
@@ -444,14 +622,21 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
             {cardState.partnerOne} &amp; {cardState.partnerTwo}
           </button>
 
-          {/* Center: Section Anchor Navigation (THE DATE | SCHEDULE | VENUE | RSVP) */}
-          <nav className="hidden md:flex items-center gap-7 text-[11px] uppercase tracking-[0.2em] font-semibold text-[#5A554C]">
+          {/* Center: Section Anchor Navigation */}
+          <nav className="hidden lg:flex items-center gap-6 text-[11px] uppercase tracking-[0.2em] font-semibold text-[#5A554C]">
             <button
               type="button"
               onClick={() => scrollToSection('section-the-date')}
               className="hover:opacity-75 transition-opacity cursor-pointer"
             >
               THE DATE
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToSection('section-story')}
+              className="hover:opacity-75 transition-opacity cursor-pointer"
+            >
+              OUR STORY
             </button>
             <button
               type="button"
@@ -462,10 +647,24 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
             </button>
             <button
               type="button"
+              onClick={() => scrollToSection('section-attire')}
+              className="hover:opacity-75 transition-opacity cursor-pointer"
+            >
+              ATTIRE
+            </button>
+            <button
+              type="button"
               onClick={() => scrollToSection('section-venue')}
               className="hover:opacity-75 transition-opacity cursor-pointer"
             >
               VENUE
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToSection('section-gallery')}
+              className="hover:opacity-75 transition-opacity cursor-pointer"
+            >
+              GALLERY
             </button>
             <button
               type="button"
@@ -479,7 +678,6 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
 
           {/* Right: Music Toggle + RSVP Pill Button */}
           <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-            {/* Romantic Music Button */}
             <button
               type="button"
               onClick={toggleMusic}
@@ -492,7 +690,10 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
             >
               {isPlayingMusic ? (
                 <>
-                  <Volume2 className="w-3.5 h-3.5 animate-pulse" style={{ color: cardState.accentColor }} />
+                  <Volume2
+                    className="w-3.5 h-3.5 animate-pulse"
+                    style={{ color: cardState.accentColor }}
+                  />
                   <span className="hidden sm:inline">Music On</span>
                 </>
               ) : (
@@ -514,12 +715,12 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
           </div>
         </div>
 
-        {/* 5 Curated Wedding Card Templates Bar (Allows switching between 5 USA/European Couple Templates in 1 click) */}
+        {/* 5 Curated Wedding Card Templates Bar */}
         {showTemplateBar && !isEditorPreview && (
           <div className="bg-white/75 border-t border-[#ECE5DA] px-4 py-2 overflow-x-auto no-scrollbar">
             <div className="max-w-5xl mx-auto flex items-center justify-start sm:justify-center gap-2 min-w-max">
               <span className="text-[10px] uppercase tracking-[0.2em] text-[#7A746B] font-semibold flex items-center gap-1 mr-1">
-                <Palette className="w-3 h-3" /> 5 Card Templates:
+                <Palette className="w-3 h-3" /> 5 Card Themes:
               </span>
               {CURATED_CARD_TEMPLATES.map((preset) => {
                 const isSelected = preset.id === activePresetId;
@@ -555,7 +756,7 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
       </header>
 
       {/* =====================================================================
-          SECTION 1: ROMAN ARCHWAY HERO WITH FROSTED CARD (Screenshot 1 & 2)
+          SECTION 1: ROMAN ARCHWAY HERO WITH TRANSLUCENT GLASS CARD
          ===================================================================== */}
       <section
         onClick={() => onSelectSection?.('couple')}
@@ -586,12 +787,18 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
           className="relative w-full max-w-[490px] sm:max-w-[530px] h-[540px] sm:h-[650px] rounded-t-full overflow-hidden shadow-[0_24px_60px_rgba(22,50,91,0.12)] border-[5px] border-white/90 bg-white"
         >
           <img
-            src={cardState.archPhotoUrl}
+            src={cardState.archPhotoUrl || ASSETS.ARCH_LAKE_COMO}
             alt={`${cardState.partnerOne} and ${cardState.partnerTwo} wedding archway`}
+            onError={(e) => {
+              const target = e.currentTarget;
+              if (target.src !== ASSETS.ARCH_LAKE_COMO) {
+                target.src = ASSETS.ARCH_LAKE_COMO;
+              }
+            }}
             className="w-full h-full object-cover object-center scale-[1.01] transition-transform duration-1000"
           />
 
-          {/* Soft bottom gradient fade into warm ivory cream (like Screenshot 1 & 2) */}
+          {/* Soft bottom gradient fade into warm ivory cream */}
           <div
             className="absolute inset-x-0 bottom-0 h-36 pointer-events-none"
             style={{
@@ -645,7 +852,7 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
           </div>
         </motion.div>
 
-        {/* "Discover the Celebration Date ⌄" Scroll Prompt (Screenshot 2) */}
+        {/* "Discover the Celebration Date ⌄" Scroll Prompt */}
         <button
           type="button"
           onClick={() => scrollToSection('section-the-date')}
@@ -657,12 +864,12 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
       </section>
 
       {/* =====================================================================
-          SECTION 2: "THE DATE" — INTERACTIVE SCRATCH CARDS (Screenshots 2 & 3)
+          SECTION 2: "THE DATE" — INTERACTIVE SCRATCH CARDS (WITH GENEROUS MOBILE MARGIN)
          ===================================================================== */}
       <section
         id="section-the-date"
         onClick={() => onSelectSection?.('settings')}
-        className="relative z-10 py-12 sm:py-16 px-4 flex flex-col items-center text-center"
+        className="relative z-10 py-12 sm:py-16 px-5 sm:px-6 flex flex-col items-center text-center"
       >
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -692,7 +899,7 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
             <span style={{ color: cardState.accentColor }}>✦</span>
           </div>
 
-          <p className="mt-1.5 mb-8 text-xs sm:text-sm text-[#6E6A63]">
+          <p className="mt-1.5 mb-8 px-4 text-xs sm:text-sm text-[#6E6A63]">
             Scratch the cards below to reveal our marriage date
           </p>
 
@@ -711,14 +918,14 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
         </motion.div>
 
         {/* ===================================================================
-            SECTION 3: LIVE COUNTDOWN & GOOGLE CALENDAR CARD (Screenshots 2 & 3)
+            SECTION 3: LIVE COUNTDOWN & GOOGLE CALENDAR CARD
            =================================================================== */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.25 }}
           transition={{ duration: 0.7, delay: 0.1 }}
-          className="mt-12 w-full max-w-[480px] rounded-3xl bg-white/95 px-6 py-8 sm:px-10 sm:py-9 shadow-[0_12px_36px_rgba(22,50,91,0.06)] border border-[#EAE2D6] text-center"
+          className="mt-12 w-full max-w-[480px] rounded-3xl bg-white/95 px-5 py-8 sm:px-10 sm:py-9 shadow-[0_12px_36px_rgba(22,50,91,0.06)] border border-[#EAE2D6] text-center"
         >
           {/* • XX DAYS TO GO Pill */}
           <div
@@ -786,8 +993,146 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
       </section>
 
       {/* =====================================================================
+          NEW TRENDING USA & UK SECTION A: "OUR LOVE STORY — LONDON TO NEW YORK"
+         ===================================================================== */}
+      <section
+        id="section-story"
+        className="relative z-10 py-14 sm:py-18 px-4 flex flex-col items-center"
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.7 }}
+          className="text-center max-w-2xl mx-auto mb-12"
+        >
+          <p
+            className="text-[11px] uppercase tracking-[0.28em] font-bold mb-2"
+            style={{ color: cardState.accentColor }}
+          >
+            A TRANSATLANTIC ROMANCE · UK &amp; USA
+          </p>
+          <h2
+            className="text-4xl sm:text-5xl font-bold tracking-tight"
+            style={{
+              fontFamily: `'Playfair Display', Georgia, serif`,
+              color: '#25231F',
+            }}
+          >
+            Our Love Story
+          </h2>
+          <p className="mt-2.5 text-xs sm:text-sm text-[#666159] leading-relaxed px-2">
+            From a chance autumn evening in Mayfair, London to a winter snowfall at Central Park’s
+            Bow Bridge in New York—every mile brought us closer to forever.
+          </p>
+          <div className="mt-3 flex items-center justify-center gap-2.5">
+            <span className="w-8 h-px bg-[#D5CBBF]" />
+            <Heart className="w-3.5 h-3.5 fill-[#F3B6AF] text-[#D98A82]" />
+            <span className="w-8 h-px bg-[#D5CBBF]" />
+          </div>
+        </motion.div>
+
+        <div className="w-full max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          {/* Left: Half-Round Arched Story Portrait */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.25 }}
+            transition={{ duration: 0.75 }}
+            className="lg:col-span-5 flex justify-center"
+          >
+            <div className="relative w-full max-w-[330px] h-[420px] rounded-t-full rounded-b-3xl overflow-hidden bg-white p-2.5 shadow-[0_18px_44px_rgba(22,50,91,0.1)] border border-[#EAE2D6]">
+              <div className="relative w-full h-full rounded-t-full rounded-b-2xl overflow-hidden">
+                <img
+                  src={ASSETS.COUPLE_USA_NAPA}
+                  alt={`${cardState.partnerOne} & ${cardState.partnerTwo} engagement story`}
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (target.src !== ASSETS.COUPLE_EUROPEAN_VILLA) {
+                      target.src = ASSETS.COUPLE_EUROPEAN_VILLA;
+                    }
+                  }}
+                  className="w-full h-full object-cover object-center"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                <div className="absolute inset-x-4 bottom-5 text-center text-white">
+                  <p className="text-[10px] uppercase tracking-[0.24em] font-semibold text-white/85">
+                    LONDON · NEW YORK · LAKE COMO
+                  </p>
+                  <p
+                    className="mt-1 text-base italic"
+                    style={{ fontFamily: `'Cormorant Garamond', Georgia, serif` }}
+                  >
+                    “Two cities, one shared home in each other.”
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Right: 3 Editorial Story Chapters */}
+          <div className="lg:col-span-7 space-y-4">
+            {[
+              {
+                roman: 'I',
+                badge: 'AUTUMN 2022 · MAYFAIR, LONDON (UK)',
+                title: 'First Meeting at The Connaught',
+                text: `Introduced by mutual friends during London Art Week over espresso martinis and rain-streaked windows in Mayfair. What was meant to be a brief hello turned into four hours of effortless conversation.`,
+              },
+              {
+                badge: 'SUMMER 2024 · THE COTSWOLDS & THE HAMPTONS',
+                roman: 'II',
+                title: 'Across the Atlantic Together',
+                text: `Between Sunday walks through honey-stone villages in Oxfordshire and sunset sails in East Hampton, New York, we blended our British and American traditions into one life.`,
+              },
+              {
+                badge: 'DECEMBER 2025 · CENTRAL PARK, NEW YORK (USA)',
+                roman: 'III',
+                title: 'The Proposal at Bow Bridge',
+                text: `Under the first December snowfall in Manhattan, ${cardState.partnerOne} knelt on Bow Bridge with a vintage heirloom ring—and ${cardState.partnerTwo} said yes before the question was even finished.`,
+              },
+            ].map((ch, idx) => (
+              <motion.div
+                key={ch.roman}
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.25 }}
+                transition={{ duration: 0.6, delay: idx * 0.1 }}
+                className="bg-white/95 rounded-2xl p-5 sm:p-6 border border-[#EAE2D6] shadow-[0_8px_26px_rgba(22,50,91,0.05)] flex items-start gap-4"
+              >
+                <div
+                  className="w-10 h-12 rounded-t-full rounded-b-lg shrink-0 flex items-center justify-center text-xs font-bold tracking-widest border"
+                  style={{
+                    backgroundColor: `${cardState.accentColor}16`,
+                    borderColor: `${cardState.accentColor}45`,
+                    color: cardState.primaryColor,
+                    fontFamily: `'Playfair Display', Georgia, serif`,
+                  }}
+                >
+                  {ch.roman}
+                </div>
+                <div>
+                  <span
+                    className="text-[10px] uppercase tracking-[0.2em] font-bold block"
+                    style={{ color: cardState.accentColor }}
+                  >
+                    {ch.badge}
+                  </span>
+                  <h3 className="text-base sm:text-lg font-bold text-[#1F1D1A] mt-0.5">
+                    {ch.title}
+                  </h3>
+                  <p className="mt-1.5 text-xs sm:text-sm text-[#666159] leading-relaxed">
+                    {ch.text}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* =====================================================================
           SECTION 4: "SCHEDULE OF EVENTS" TIMELINE + MARRIAGE FINAL DATE CARD
-          (Matches Reference Screenshots 3, 4 & 5)
          ===================================================================== */}
       <section
         id="section-schedule"
@@ -819,7 +1164,6 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
 
         {/* Alternating Vertical Timeline with Center Line & Diamond Nodes */}
         <div className="relative w-full max-w-3xl mx-auto">
-          {/* Center Vertical Line */}
           <div
             className="hidden sm:block absolute left-1/2 top-4 bottom-4 w-px -translate-x-1/2"
             style={{ backgroundColor: `${cardState.accentColor}66` }}
@@ -838,7 +1182,8 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
                   className="relative grid grid-cols-1 sm:grid-cols-2 items-center gap-4 sm:gap-12"
                 >
                   {/* Center Diamond Node on Desktop */}
-                  <div className="hidden sm:flex absolute left-1/2 -translate-x-1/2 z-10 w-5 h-5 rounded-xs bg-white border items-center justify-center rotate-45 shadow-2xs"
+                  <div
+                    className="hidden sm:flex absolute left-1/2 -translate-x-1/2 z-10 w-5 h-5 rounded-xs bg-white border items-center justify-center rotate-45 shadow-2xs"
                     style={{ borderColor: `${cardState.accentColor}88` }}
                   >
                     <div
@@ -859,7 +1204,6 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
                     }`}
                   >
                     <div className="bg-white/95 rounded-2xl p-6 sm:p-7 border border-[#EAE2D6] shadow-[0_8px_28px_rgba(22,50,91,0.05)]">
-                      {/* Pills Row */}
                       <div
                         className={`flex flex-wrap items-center gap-2 mb-3.5 ${
                           isLeft ? 'sm:justify-end' : 'sm:justify-start'
@@ -903,7 +1247,7 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
         </div>
 
         {/* ===================================================================
-            ORNAMENTAL "MARRIAGE FINAL DATE" HIGHLIGHT CARD (Screenshot 4 & 5)
+            ORNAMENTAL "MARRIAGE FINAL DATE" HIGHLIGHT CARD
            =================================================================== */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -912,7 +1256,6 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
           transition={{ duration: 0.7 }}
           className="mt-14 w-full max-w-[580px] rounded-3xl bg-[#FDFBF7] px-6 py-9 sm:px-12 sm:py-11 border-2 border-[#DECFA8] shadow-[0_14px_40px_rgba(22,50,91,0.07)] text-center relative"
         >
-          {/* Subtle Corner Ornaments */}
           <span className="absolute top-3.5 left-4 text-xs text-[#C7B27C] select-none">
             ✦ ❦
           </span>
@@ -920,7 +1263,6 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
             ❦ ✦
           </span>
 
-          {/* Top Navy Badge: ✨ MARRIAGE FINAL DATE ✨ */}
           <div
             className="inline-flex items-center gap-2 px-5 py-1.5 rounded-full text-[10px] sm:text-[11px] uppercase tracking-[0.2em] font-bold text-white shadow-xs"
             style={{ backgroundColor: cardState.primaryColor }}
@@ -960,8 +1302,127 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
       </section>
 
       {/* =====================================================================
+          NEW TRENDING USA & UK SECTION B: "DRESS CODE & GUEST ATTIRE PALETTE"
+         ===================================================================== */}
+      <section
+        id="section-attire"
+        className="relative z-10 py-12 sm:py-16 px-4 flex flex-col items-center"
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 22 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.25 }}
+          transition={{ duration: 0.7 }}
+          className="w-full max-w-[620px] rounded-3xl bg-white/95 px-6 py-9 sm:px-12 sm:py-11 border border-[#EAE2D6] shadow-[0_14px_38px_rgba(22,50,91,0.06)] text-center"
+        >
+          <p
+            className="text-[10px] sm:text-[11px] uppercase tracking-[0.26em] font-bold"
+            style={{ color: cardState.accentColor }}
+          >
+            DRESS CODE &amp; GUEST PALETTE
+          </p>
+          <h2
+            className="mt-2 text-3xl sm:text-4xl font-bold tracking-tight"
+            style={{
+              fontFamily: `'Playfair Display', Georgia, serif`,
+              color: '#22201C',
+            }}
+          >
+            Black-Tie &amp; English Garden Formal
+          </h2>
+          <p className="mt-2.5 text-xs sm:text-sm text-[#666159] max-w-lg mx-auto leading-relaxed">
+            We warmly invite our guests to dress in timeless European &amp; American eveningwear.
+            Tap any color below to preview our celebration palette and transform the card theme.
+          </p>
+
+          {/* Interactive 5-Swatch Theme Selector */}
+          <div className="mt-7 flex items-center justify-center gap-3.5 sm:gap-5">
+            {attireSwatches.map((sw, idx) => {
+              const isSelected = activePresetId === sw.preset.id || activeSwatchIdx === idx;
+              return (
+                <button
+                  key={sw.name}
+                  type="button"
+                  onClick={() => handleSelectTemplatePreset(sw.preset, idx)}
+                  aria-label={`Apply ${sw.name} Theme`}
+                  title={`Apply ${sw.name} Theme`}
+                  className={`group relative w-11 h-11 sm:w-13 sm:h-13 rounded-full transition-all duration-300 cursor-pointer flex items-center justify-center ${
+                    isSelected
+                      ? 'scale-115 ring-2 ring-offset-3'
+                      : 'hover:scale-105 opacity-85 hover:opacity-100'
+                  }`}
+                  style={{
+                    background: `linear-gradient(135deg, ${sw.hex} 55%, ${sw.accentHex} 100%)`,
+                    boxShadow: '0 6px 16px rgba(0,0,0,0.12)',
+                    outlineColor: sw.hex,
+                  }}
+                >
+                  {isSelected && (
+                    <Check className="w-4 h-4 text-white drop-shadow-xs" strokeWidth={2.5} />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Active Swatch Detail Pill */}
+          <motion.div
+            key={activeSwatchIdx}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mt-5 px-5 py-3.5 rounded-2xl bg-[#FAF6F0] border border-[#E6DED2] max-w-md mx-auto"
+          >
+            <div
+              className="text-xs font-bold uppercase tracking-[0.18em]"
+              style={{ color: cardState.primaryColor }}
+            >
+              {attireSwatches[activeSwatchIdx]?.name} · Active Theme
+            </div>
+            <p className="mt-1 text-xs text-[#666159] leading-relaxed">
+              {attireSwatches[activeSwatchIdx]?.note}
+            </p>
+          </motion.div>
+
+          {/* Gentlemen & Ladies Guide Cards */}
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-left">
+            <div className="p-4 rounded-2xl bg-[#FAF8F4] border border-[#EAE2D6]">
+              <span
+                className="text-[10px] uppercase tracking-[0.2em] font-bold block"
+                style={{ color: cardState.accentColor }}
+              >
+                FOR GENTLEMEN
+              </span>
+              <h4 className="text-sm font-bold text-[#22201C] mt-1">
+                Black-Tie Tuxedo or Savile Row Suit
+              </h4>
+              <p className="mt-1 text-xs text-[#666159] leading-relaxed">
+                Classic black, midnight navy, or ivory dinner jacket with bow tie and formal
+                dress shoes.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-[#FAF8F4] border border-[#EAE2D6]">
+              <span
+                className="text-[10px] uppercase tracking-[0.2em] font-bold block"
+                style={{ color: cardState.accentColor }}
+              >
+                FOR LADIES
+              </span>
+              <h4 className="text-sm font-bold text-[#22201C] mt-1">
+                Evening Gowns &amp; Cocktail Couture
+              </h4>
+              <p className="mt-1 text-xs text-[#666159] leading-relaxed">
+                Floor-length silk, chiffon, or satin gowns. Block heels or wedges are recommended
+                for the stone garden terrace.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* =====================================================================
           SECTION 5: "MARRIAGE VENUE" PHOTO CARD + COLLAPSIBLE MAP + BUTTONS
-          (Matches Reference Screenshots 5 & 6)
          ===================================================================== */}
       <section
         id="section-venue"
@@ -986,11 +1447,16 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
           transition={{ duration: 0.7 }}
           className="w-full max-w-[600px] rounded-3xl overflow-hidden bg-white shadow-[0_16px_44px_rgba(22,50,91,0.1)] border border-[#E6DED2]"
         >
-          {/* Top Venue Photograph with Bottom Dark Scrim Overlay & HIDE/SHOW MAP Button */}
           <div className="relative h-[300px] sm:h-[360px] w-full overflow-hidden">
             <img
-              src={cardState.venuePhotoUrl}
+              src={cardState.venuePhotoUrl || ASSETS.VENUE_VILLA_LAWN}
               alt={cardState.venueName}
+              onError={(e) => {
+                const target = e.currentTarget;
+                if (target.src !== ASSETS.VENUE_VILLA_LAWN) {
+                  target.src = ASSETS.VENUE_VILLA_LAWN;
+                }
+              }}
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
@@ -1004,7 +1470,8 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
                   {cardState.venueName}
                 </h3>
                 <p className="mt-1 text-[10px] sm:text-[11px] uppercase tracking-[0.16em] text-white/80">
-                  {cardState.events.map((e) => e.title.split(' ')[0].toUpperCase()).join(' · ')} · MARRIAGE
+                  {cardState.events.map((e) => e.title.split(' ')[0].toUpperCase()).join(' · ')} ·
+                  MARRIAGE
                 </p>
               </div>
 
@@ -1019,7 +1486,6 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
             </div>
           </div>
 
-          {/* Collapsible Embedded Google Map (Matches Screenshot 6) */}
           <AnimatePresence initial={false}>
             {showVenueMap && (
               <motion.div
@@ -1075,7 +1541,7 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
           </button>
         </div>
 
-        {/* Venue Address & Parking Note Box (Matches Screenshot 6) */}
+        {/* Venue Address & Parking Note Box */}
         <div className="mt-5 w-full max-w-[460px] rounded-2xl bg-white/90 border border-[#EAE2D6] px-6 py-5 text-center shadow-2xs">
           <p className="text-xs font-bold text-[#25231F] leading-relaxed">
             📍 {cardState.venueName}, {cardState.venueAddress}
@@ -1084,11 +1550,109 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
             {cardState.venueParkingNote}
           </p>
         </div>
+
+        {/* ===================================================================
+            NEW TRENDING USA & UK SECTION C: TRAVEL, CONCIERGE & HOTEL BLOCK
+           =================================================================== */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.7 }}
+          className="mt-12 w-full max-w-3xl grid grid-cols-1 md:grid-cols-3 gap-4"
+        >
+          <div className="bg-white/95 rounded-2xl p-5 border border-[#EAE2D6] shadow-2xs text-center flex flex-col items-center">
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center mb-3"
+              style={{
+                backgroundColor: `${cardState.accentColor}1A`,
+                color: cardState.primaryColor,
+              }}
+            >
+              <Plane className="w-4 h-4" />
+            </div>
+            <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#7A7368]">
+              USA &amp; UK ARRIVALS
+            </span>
+            <h4 className="text-sm font-bold text-[#22201C] mt-1">
+              London (LHR) &amp; New York (JFK)
+            </h4>
+            <p className="mt-1.5 text-xs text-[#666159] leading-relaxed">
+              Direct flights arrive into Milan Malpensa (MXP), followed by a 50-minute private
+              chauffeur transfer to the lakeside pier.
+            </p>
+          </div>
+
+          <div className="bg-white/95 rounded-2xl p-5 border border-[#EAE2D6] shadow-2xs text-center flex flex-col items-center justify-between">
+            <div className="flex flex-col items-center">
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center mb-3"
+                style={{
+                  backgroundColor: `${cardState.accentColor}1A`,
+                  color: cardState.primaryColor,
+                }}
+              >
+                <Hotel className="w-4 h-4" />
+              </div>
+              <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#7A7368]">
+                RESERVED ROOM BLOCK
+              </span>
+              <h4 className="text-sm font-bold text-[#22201C] mt-1">
+                Grand Hotel Tremezzo
+              </h4>
+              <p className="mt-1.5 text-xs text-[#666159] leading-relaxed">
+                Preferential suite &amp; room rates reserved for our wedding guests.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleCopyHotelCode}
+              className="mt-3 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[10px] uppercase tracking-[0.16em] font-bold border bg-[#FAF6F0] hover:bg-white cursor-pointer transition-colors"
+              style={{
+                borderColor: `${cardState.accentColor}66`,
+                color: cardState.primaryColor,
+              }}
+            >
+              {copiedHotelCode ? (
+                <>
+                  <Check className="w-3 h-3 text-emerald-700" />
+                  <span>CODE COPIED!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3 h-3" />
+                  <span>CODE: JULIANCLARA26</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          <div className="bg-white/95 rounded-2xl p-5 border border-[#EAE2D6] shadow-2xs text-center flex flex-col items-center">
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center mb-3"
+              style={{
+                backgroundColor: `${cardState.accentColor}1A`,
+                color: cardState.primaryColor,
+              }}
+            >
+              <Wine className="w-4 h-4" />
+            </div>
+            <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#7A7368]">
+              MORNING AFTER
+            </span>
+            <h4 className="text-sm font-bold text-[#22201C] mt-1">
+              Farewell Garden Brunch
+            </h4>
+            <p className="mt-1.5 text-xs text-[#666159] leading-relaxed">
+              Join us at 11:00 AM the morning after the wedding for Bellinis, English breakfast
+              tea, and Italian pastries by the water.
+            </p>
+          </div>
+        </motion.div>
       </section>
 
       {/* =====================================================================
           SECTION 6: "HONOURED GUEST INVITATION — WITH JOYFUL HEARTS WE INVITE YOU"
-          (Matches Reference Screenshot 7 + Interactive RSVP)
          ===================================================================== */}
       <section
         id="section-rsvp"
@@ -1102,7 +1666,6 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
           transition={{ duration: 0.7 }}
           className="w-full max-w-[650px] rounded-3xl bg-[#FDFBF7] px-6 py-10 sm:px-14 sm:py-14 border border-[#E2D9C8] shadow-[0_18px_48px_rgba(22,50,91,0.07)] text-center relative"
         >
-          {/* Subtle Corner Ornaments */}
           <span className="absolute top-4 left-5 text-xs text-[#CBB889] select-none">✦ ❦</span>
           <span className="absolute top-4 right-5 text-xs text-[#CBB889] select-none">❦ ✦</span>
           <span className="absolute bottom-4 left-5 text-xs text-[#CBB889] select-none">✦ ❦</span>
@@ -1120,7 +1683,6 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
             {initials}
           </div>
 
-          {/* — HONOURED GUEST INVITATION — */}
           <div className="mt-5 flex items-center justify-center gap-3">
             <span className="w-7 h-px bg-[#D5CBBF]" />
             <span className="text-[10px] sm:text-[11px] uppercase tracking-[0.26em] text-[#7A7368] font-semibold">
@@ -1154,7 +1716,7 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
             truly complete and auspicious.
           </p>
 
-          {/* Event Summary Pills Row (Matches Screenshot 7) */}
+          {/* Event Summary Pills Row */}
           <div className="mt-7 flex flex-wrap items-center justify-center gap-2.5">
             {cardState.events.map((ev, i) => (
               <span
@@ -1169,7 +1731,6 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
             ))}
           </div>
 
-          {/* Main Marriage Ceremony Pill */}
           <div className="mt-3 flex justify-center">
             <span
               className="px-5 py-1.5 rounded-full text-[11px] font-bold text-white shadow-2xs"
@@ -1231,8 +1792,187 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
       </section>
 
       {/* =====================================================================
+          NEW TRENDING USA & UK SECTION D: "CAPTURED MOMENTS — SCROLLING GALLERY"
+         ===================================================================== */}
+      <section
+        id="section-gallery"
+        className="relative z-10 py-14 sm:py-18 overflow-hidden flex flex-col items-center"
+      >
+        <div className="max-w-5xl w-full px-4 mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4 text-center sm:text-left">
+          <div>
+            <p
+              className="text-[11px] uppercase tracking-[0.28em] font-bold mb-2"
+              style={{ color: cardState.accentColor }}
+            >
+              PRE-WEDDING &amp; ENGAGEMENT MOMENTS · UK, USA &amp; ITALY
+            </p>
+            <h2
+              className="text-3xl sm:text-5xl font-bold tracking-tight"
+              style={{
+                fontFamily: `'Playfair Display', Georgia, serif`,
+                color: '#22201C',
+              }}
+            >
+              Captured Moments
+            </h2>
+            <p className="mt-2 text-xs sm:text-sm text-[#666159] max-w-xl">
+              A scrolling visual diary of {cardState.partnerOne} &amp; {cardState.partnerTwo}’s
+              journey across London, New York, Napa Valley, and Lake Como. Tap any portrait to view
+              full screen.
+            </p>
+          </div>
+
+          {/* Left / Right Manual Scroll Controls */}
+          <div className="flex items-center justify-center sm:justify-end gap-2.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => handleScrollGallery('left')}
+              aria-label="Scroll Gallery Left"
+              className="w-10 h-10 rounded-full bg-white border border-[#DFD7CA] hover:bg-[#FAF6F0] flex items-center justify-center text-[#25231F] shadow-2xs transition-transform active:scale-95 cursor-pointer"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => handleScrollGallery('right')}
+              aria-label="Scroll Gallery Right"
+              className="w-10 h-10 rounded-full bg-white border border-[#DFD7CA] hover:bg-[#FAF6F0] flex items-center justify-center text-[#25231F] shadow-2xs transition-transform active:scale-95 cursor-pointer"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Continuous Horizontal Scrolling Arch Filmstrip */}
+        <div
+          ref={galleryScrollRef}
+          onMouseEnter={() => setIsGalleryPaused(true)}
+          onMouseLeave={() => setIsGalleryPaused(false)}
+          onTouchStart={() => setIsGalleryPaused(true)}
+          onTouchEnd={() => setIsGalleryPaused(false)}
+          className="w-full overflow-x-auto no-scrollbar px-6 sm:px-12 py-4 flex items-stretch gap-5 sm:gap-7 select-none"
+        >
+          {[...PRE_WEDDING_GALLERY_MOMENTS, ...PRE_WEDDING_GALLERY_MOMENTS].map((item, idx) => (
+            <motion.div
+              key={`${item.id}-${idx}`}
+              whileHover={{ y: -6 }}
+              transition={{ duration: 0.35 }}
+              onClick={() => setActiveLightboxMoment(item)}
+              className="group relative w-[265px] sm:w-[305px] shrink-0 rounded-t-full rounded-b-3xl bg-white p-2.5 shadow-[0_16px_40px_rgba(22,50,91,0.09)] border border-[#EAE2D6] cursor-pointer"
+            >
+              <div className="relative w-full h-[350px] sm:h-[395px] rounded-t-full rounded-b-2xl overflow-hidden">
+                <img
+                  src={item.imageUrl}
+                  alt={item.title}
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (target.src !== item.fallbackUrl) {
+                      target.src = item.fallbackUrl;
+                    }
+                  }}
+                  style={{ objectPosition: item.objectPosition || 'center center' }}
+                  className="w-full h-full object-cover group-hover:scale-107 transition-transform duration-700"
+                />
+
+                {/* Subtle Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent" />
+
+                {/* Top Arch Chapter Badge */}
+                <div className="absolute top-5 inset-x-0 flex justify-center">
+                  <span className="px-3 py-1 rounded-full text-[10px] uppercase tracking-[0.22em] font-bold bg-white/80 backdrop-blur-md text-[#1E1C18] shadow-2xs">
+                    {item.number} · {item.location.split('·')[0].trim()}
+                  </span>
+                </div>
+
+                {/* Expand Icon on Hover */}
+                <div className="absolute top-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="w-8 h-8 rounded-full bg-black/45 backdrop-blur-xs border border-white/35 text-white flex items-center justify-center">
+                    <Maximize2 className="w-3.5 h-3.5" />
+                  </span>
+                </div>
+
+                {/* Bottom Editorial Caption inside Arch Card */}
+                <div className="absolute inset-x-4 bottom-4 text-center text-white">
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-white/80 font-semibold">
+                    {item.location}
+                  </p>
+                  <h3
+                    className="mt-1 text-xl font-bold tracking-tight"
+                    style={{ fontFamily: `'Playfair Display', Georgia, serif` }}
+                  >
+                    {item.title}
+                  </h3>
+                  <p
+                    className="mt-1 text-xs italic text-white/90 line-clamp-2"
+                    style={{ fontFamily: `'Cormorant Garamond', Georgia, serif`, fontSize: '14px' }}
+                  >
+                    “{item.caption}”
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Lightbox Modal for Full-Screen Gallery Portrait View */}
+      <AnimatePresence>
+        {activeLightboxMoment && (
+          <motion.div
+            key="gallery-lightbox"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setActiveLightboxMoment(null)}
+            className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4 no-print"
+          >
+            <motion.div
+              initial={{ scale: 0.94, y: 16 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.94, y: 16 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-md rounded-t-full rounded-b-3xl bg-white p-3 shadow-2xl border border-white/80"
+            >
+              <button
+                type="button"
+                onClick={() => setActiveLightboxMoment(null)}
+                className="absolute top-6 right-6 z-20 w-9 h-9 rounded-full bg-black/55 hover:bg-black/75 text-white flex items-center justify-center cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              <div className="relative w-full h-[460px] sm:h-[520px] rounded-t-full rounded-b-2xl overflow-hidden">
+                <img
+                  src={activeLightboxMoment.imageUrl}
+                  alt={activeLightboxMoment.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+                <div className="absolute inset-x-6 bottom-6 text-center text-white">
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-white/85 font-bold">
+                    {activeLightboxMoment.location}
+                  </p>
+                  <h3
+                    className="mt-1 text-2xl sm:text-3xl font-bold"
+                    style={{ fontFamily: `'Playfair Display', Georgia, serif` }}
+                  >
+                    {activeLightboxMoment.title}
+                  </h3>
+                  <p
+                    className="mt-2 text-base italic text-white/90"
+                    style={{ fontFamily: `'Cormorant Garamond', Georgia, serif` }}
+                  >
+                    “{activeLightboxMoment.caption}”
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* =====================================================================
           SECTION 7: "HOPE TO SEE YOU THERE!" FRAMED COUPLE PORTRAIT & FOOTER
-          (Matches Reference Screenshots 8 & 9)
          ===================================================================== */}
       <section className="relative z-10 pt-8 pb-20 px-4 flex flex-col items-center text-center">
         <p
@@ -1270,6 +2010,12 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
             <img
               src={cardState.couplePortraitUrl || ASSETS.COUPLE_EUROPEAN_VILLA}
               alt={`${cardState.partnerOne} & ${cardState.partnerTwo} Portrait`}
+              onError={(e) => {
+                const target = e.currentTarget;
+                if (target.src !== ASSETS.COUPLE_EUROPEAN_VILLA) {
+                  target.src = ASSETS.COUPLE_EUROPEAN_VILLA;
+                }
+              }}
               className="w-full h-full object-cover object-top"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
@@ -1288,7 +2034,7 @@ export const InvitationCanvas: React.FC<InvitationCanvasProps> = ({
           </div>
         </motion.div>
 
-        {/* ↑ BACK TO TOP Pill Button (Screenshot 9) */}
+        {/* ↑ BACK TO TOP Pill Button */}
         <button
           type="button"
           onClick={() => scrollToSection('wedding-card-top')}

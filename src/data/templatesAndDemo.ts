@@ -7,15 +7,22 @@ import {
   LanguageCode,
 } from '../types/vowora';
 
+import archLakeComoImg from '../assets/images/arch_lake_como_terrace_1794388510617.jpg';
+import coupleEuropeanVillaImg from '../assets/images/couple_european_villa_1794388510872.jpg';
+import coupleUsaNapaImg from '../assets/images/couple_usa_napa_valley_1794388510084.jpg';
+import venueVillaLawnImg from '../assets/images/venue_villa_balbianello_lawn_1794388513816.jpg';
+import heroEditorialImg from '../assets/images/hero_wedding_editorial_1794386500757.jpg';
+import tableSettingImg from '../assets/images/editorial_table_setting_1794386560975.jpg';
+
 export const ASSETS = {
-  ARCH_LAKE_COMO: '/src/assets/images/arch_lake_como_terrace_1794388510617.jpg',
-  COUPLE_EUROPEAN_VILLA: '/src/assets/images/couple_european_villa_1794388510872.jpg',
-  COUPLE_USA_NAPA: '/src/assets/images/couple_usa_napa_valley_1794388510084.jpg',
-  VENUE_VILLA_LAWN: '/src/assets/images/venue_villa_balbianello_lawn_1794388513816.jpg',
-  HERO_EDITORIAL: '/src/assets/images/hero_wedding_editorial_1794386500757.jpg',
-  TABLE_SETTING: '/src/assets/images/editorial_table_setting_1794386560975.jpg',
-  COUPLE_AARAV_MEERA: '/src/assets/images/couple_european_villa_1794388510872.jpg',
-  VENUE_PALACE: '/src/assets/images/venue_villa_balbianello_lawn_1794388513816.jpg',
+  ARCH_LAKE_COMO: archLakeComoImg,
+  COUPLE_EUROPEAN_VILLA: coupleEuropeanVillaImg,
+  COUPLE_USA_NAPA: coupleUsaNapaImg,
+  VENUE_VILLA_LAWN: venueVillaLawnImg,
+  HERO_EDITORIAL: heroEditorialImg,
+  TABLE_SETTING: tableSettingImg,
+  COUPLE_AARAV_MEERA: coupleEuropeanVillaImg,
+  VENUE_PALACE: venueVillaLawnImg,
 };
 
 export interface CuratedCardPreset {
